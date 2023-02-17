@@ -1,6 +1,8 @@
-{ lib, stdenv, fetchFromGitHub, cmake, openexr, hdf5-threadsafe, ilmbase }:
+{ lib, stdenv, callPackage, fetchFromGitHub, cmake, openexr, hdf5-threadsafe, ilmbase }:
 
-stdenv.mkDerivation rec
+let cmakePackageTests = callPackage ./cmakePackageTests { };
+in
+stdenv.mkDerivation (finalAttrs: rec
 {
   pname = "alembic";
   version = "1.8.4";
@@ -58,6 +60,25 @@ stdenv.mkDerivation rec
     runHook postCheck
   '';
 
+  passthru.tests = {
+    cmake-test = cmakePackageTests.testImportedCMakePackage {
+      pkg = finalAttrs.finalPackage;
+      cmakePkgName = "Alembic";
+      checkVersion = true;
+      expectedLibraries = [
+        "Alembic::Alembic"
+      ];
+
+      checkLibraries = [
+        "Alembic::Alembic"
+      ];
+      checkIncludes = [
+        "Alembic/Abc/All.h"
+      ];
+    };
+  };
+
+
   meta = with lib; {
     description = "An open framework for storing and sharing scene data";
     homepage = "http://alembic.io/";
@@ -65,4 +86,4 @@ stdenv.mkDerivation rec
     platforms = platforms.all;
     maintainers = with maintainers; [ guibou tmarkus ];
   };
-}
+})
