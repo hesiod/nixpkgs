@@ -35375,6 +35375,8 @@ with pkgs;
 
   openarena = callPackage ../games/openarena { };
 
+  openbve = callPackage ../games/openbve { };
+
   opendungeons = callPackage ../games/opendungeons {
     ogre = ogre1_10;
   };
