@@ -1,0 +1,13 @@
+--- a/libs/kiplatform/gtk/environment.cpp	1970-01-01 01:00:01.000000000 +0100
++++ b/libs/kiplatform/gtk/environment.cpp	2023-03-17 22:25:14.910990036 +0100
+@@ -35,10 +35,6 @@
+     if( wxGetEnv( wxT( "XDG_CURRENT_DESKTOP" ), &wm ) && wm.CmpNoCase( wxT( "Unity" ) ) == 0 )
+         wxSetEnv ( wxT("UBUNTU_MENUPROXY" ), wxT( "0" ) );
+ 
+-    // Force the use of X11 backend (or wayland-x11 compatibility layer).  This is
+-    // required until wxWidgets supports the Wayland compositors
+-    wxSetEnv( wxT( "GDK_BACKEND" ), wxT( "x11" ) );
+-
+     // Set GTK2-style input instead of xinput2.  This disables touchscreen and smooth
+     // scrolling.  It's needed to ensure that we are not getting multiple mouse scroll
+     // events.

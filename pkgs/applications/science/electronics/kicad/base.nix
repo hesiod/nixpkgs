@@ -55,6 +55,7 @@
 , debug
 , sanitizeAddress
 , sanitizeThreads
+, forceWayland
 }:
 
 assert lib.assertMsg (!(sanitizeAddress && sanitizeThreads))
@@ -73,6 +74,7 @@ stdenv.mkDerivation rec {
     # upstream issue 12941 (attempted to upstream, but appreciably unacceptable)
     ./writable.patch
   ]
+  ++ optional forceWayland ./gdk-backend-x11.patch
   ++ optionals (stable) # the 2 wxGTK ones should in the next stable point release
   [
     (fetchpatch { # for wxGTK 3.2.2.1's .1 field

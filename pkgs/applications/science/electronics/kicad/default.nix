@@ -22,6 +22,7 @@
 , debug ? false
 , sanitizeAddress ? false
 , sanitizeThreads ? false
+, forceWayland ? true
 , with3d ? true
 , withI18n ? true
 , srcs ? { }
@@ -118,7 +119,7 @@ stdenv.mkDerivation rec {
     inherit kicadSrc kicadVersion;
     inherit wxGTK python wxPython;
     inherit withOCC withNgspice withScripting withI18n;
-    inherit debug sanitizeAddress sanitizeThreads;
+    inherit debug sanitizeAddress sanitizeThreads forceWayland;
   };
 
   inherit pname;
