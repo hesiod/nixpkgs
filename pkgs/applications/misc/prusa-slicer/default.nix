@@ -20,6 +20,7 @@
 , hicolor-icon-theme
 , ilmbase
 , libpng
+, libspnav
 , mpfr
 , nlopt
 , opencascade-occt
@@ -71,6 +72,7 @@ stdenv.mkDerivation rec {
     hicolor-icon-theme
     ilmbase
     libpng
+    libspnav
     mpfr
     nlopt
     opencascade-occt
