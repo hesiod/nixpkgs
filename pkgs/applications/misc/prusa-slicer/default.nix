@@ -181,7 +181,7 @@ stdenv.mkDerivation rec {
     description = "G-code generator for 3D printer";
     homepage = "https://github.com/prusa3d/PrusaSlicer";
     license = licenses.agpl3;
-    maintainers = with maintainers; [ moredread tweber ];
+    maintainers = with maintainers; [ moredread tweber tmarkus ];
   } // lib.optionalAttrs (stdenv.isDarwin) {
     mainProgram = "PrusaSlicer";
   };
