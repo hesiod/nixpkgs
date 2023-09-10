@@ -23019,7 +23019,11 @@ with pkgs;
 
   nanodbc = callPackage ../development/libraries/nanodbc { };
 
-  nanoflann = callPackage ../development/libraries/nanoflann { };
+  nanoflann = nanoflann1_5_0;
+
+  nanoflann1_4_2 = callPackage ../development/libraries/nanoflann/1.4.2.nix { };
+
+  nanoflann1_5_0 = callPackage ../development/libraries/nanoflann/1.5.0.nix { };
 
   nanomsg = callPackage ../development/libraries/nanomsg { };
 
