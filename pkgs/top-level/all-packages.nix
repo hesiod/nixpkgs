@@ -19537,8 +19537,16 @@ with pkgs;
 
   alass = callPackage ../applications/video/alass { };
 
-  alice-vision = callPackage ../development/libraries/alice-vision {
+  alice-vision = alice-vision_3_1_0;
+
+  alice-vision_3_0_0 = callPackage ../development/libraries/alice-vision/3.0.0.nix {
     inherit (llvmPackages) openmp;
+    nanoflann = nanoflann1_4_2;
+  };
+
+  alice-vision_3_1_0 = callPackage ../development/libraries/alice-vision/3.1.0.nix {
+    inherit (llvmPackages) openmp;
+    nanoflann = nanoflann1_4_2;
   };
 
   allegro = allegro4;
