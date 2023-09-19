@@ -106,6 +106,9 @@ stdenv.mkDerivation rec {
       --replace \
         'alicevision_add_test(matching_test.cpp NAME "matching"          LINKS aliceVision_matching)' \
         'alicevision_add_test(matching_test.cpp NAME "matching"          LINKS aliceVision_matching lz4)'
+  '' + lib.optionalString (stdenv.hostPlatform.system == "x86_64-linux") ''
+    # -O3 currently causes segmentation faults on x86_64-linux
+    sed -i 's/-O3/-O2/' src/CMakeLists.txt
   '';
 
   # Disable warning causing compile error on certain Clang versions
@@ -137,6 +140,8 @@ stdenv.mkDerivation rec {
         ALICEVISION_BUILD_DOC = false;
         ALICEVISION_BUILD_EXAMPLES = false;
         ALICEVISION_BUILD_SOFTWARE = true;
+        # enabled alignment led to wrong initialization of Vec2 variables
+        AV_EIGEN_MEMORY_ALIGNMENT = false;
 
         ALICEVISION_BUILD_TESTS = doCheck;
 
@@ -177,13 +182,6 @@ stdenv.mkDerivation rec {
 
         "^test_aliceVision_test_voctree_kmeans$"
 
-        # Tests failing since 3.1.0
-        "^test_aliceVision_test_sfm_bundleAdjustment$"
-        "^test_aliceVision_test_sfm_sequentialSfM$"
-        "^test_aliceVision_test_sfm_globalSfM$"
-        "^test_aliceVision_test_sfmDataIO$"
-        "^test_aliceVision_test_sfmDataIOCompatibility$"
-        "^test_aliceVision_test_sfmDataIO_alembic$"
       ] ++ lib.optionals stdenv.isDarwin [
         # Regular timeouts
         "^test_aliceVision_test_colorHarmonization_gainOffsetConstraintBuilder$"
