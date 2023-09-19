@@ -17,19 +17,19 @@
 , makeDesktopItem
 , copyDesktopItems
 , makeWrapper
-, nodePackages
+, asar
 , python3
 }:
 
 let
   pname = "pulsar";
-  version = "1.104.0";
+  version = "1.108.0";
 
   sourcesPath = {
     x86_64-linux.tarname = "Linux.${pname}-${version}.tar.gz";
-    x86_64-linux.hash = "sha256-HEMUQVNPb6qWIXX25N79HwHo7j11MyFiBRsq9otdAL8=";
+    x86_64-linux.hash = "sha256-9wxMKekowNkFX+m3h2ZeTXu/uMLyPi6IIbseJ16shG4=";
     aarch64-linux.tarname = "ARM.Linux.${pname}-${version}-arm64.tar.gz";
-    aarch64-linux.hash = "sha256-f+s54XtLLdhTFY9caKTKngJF6zLai0F7ur9v37bwuNE=";
+    aarch64-linux.hash = "sha256-GdPnmhMZR3Y2WB2j98JEWomdKFZuTgxN8oga/tBwA4U=";
   }.${stdenv.hostPlatform.system} or (throw "Unsupported system: ${stdenv.hostPlatform.system}");
 
   additionalLibs = lib.makeLibraryPath [
@@ -60,7 +60,7 @@ stdenv.mkDerivation rec {
   nativeBuildInputs = [
     wrapGAppsHook
     copyDesktopItems
-    nodePackages.asar
+    asar
   ];
 
   buildInputs = [
@@ -119,7 +119,7 @@ stdenv.mkDerivation rec {
     # But asar complains because the node_gyp unpacked dependency uses a prebuilt Python3 itself
 
     rm $opt/resources/app.asar.unpacked/node_modules/tree-sitter-bash/build/node_gyp_bins/python3
-    ln -s ${python3}/bin/python3 $opt/resources/app.asar.unpacked/node_modules/tree-sitter-bash/build/node_gyp_bins/python3
+    ln -s ${python3.interpreter} $opt/resources/app.asar.unpacked/node_modules/tree-sitter-bash/build/node_gyp_bins/python3
   '' + ''
     # Patch the bundled node executables
     find $opt -name "*.node" -exec patchelf --set-rpath "${newLibpath}:$opt" {} \;

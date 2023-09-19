@@ -2,13 +2,13 @@
 
 stdenv.mkDerivation rec {
   pname = "sqlitecpp";
-  version = "3.2.1";
+  version = "3.3.1";
 
   src = fetchFromGitHub {
     owner = "SRombauts";
     repo = pname;
     rev = version;
-    sha256 = "sha256-uVvlW95UD1dhJfNuKgo7XvbdXrHl95OhaEpWfn0RH/E=";
+    sha256 = "sha256-8l1JRaE7w9vJ4bCSLGAk9zwYHDFeKkBi9pE5fUJfLRc=";
   };
 
   nativeBuildInputs = [ cmake ];

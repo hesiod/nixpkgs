@@ -12,20 +12,20 @@
 
 let
   pname = "plausible";
-  version = "1.4.4";
+  version = "1.5.1";
 
   src = fetchFromGitHub {
     owner = "plausible";
     repo = "analytics";
     rev = "v${version}";
-    sha256 = "1ckw5cd4z96jkjhmzjq7k3kzjj7bvj38i5xq9r43cz0sn7w3470k";
+    hash = "sha256-KcIZMsWlKGCZFi7DrTS8JMWEahdERoExtpBj+7Ec+FQ=";
   };
 
   # TODO consider using `mix2nix` as soon as it supports git dependencies.
   mixFodDeps = beamPackages.fetchMixDeps {
     pname = "${pname}-deps";
     inherit src version;
-    sha256 = "1ikcskp4gvvdprl65x1spijdc8dz6klnrnkvgy2jbk0b3d7yn1v5";
+    hash = "sha256-rLkD2FuNFKU3nB8FT/qPgSVP8H60qEmHtPvcdw4JUF8=";
   };
 
   yarnDeps = mkYarnModules {
@@ -54,11 +54,14 @@ beamPackages.mixRelease {
     updateScript = ./update.sh;
   };
 
+  postPatch = ''
+    substituteInPlace lib/plausible_release.ex --replace 'defp prepare do' 'def prepare do'
+  '';
+
   postBuild = ''
     export HOME=$TMPDIR
     export NODE_OPTIONS=--openssl-legacy-provider # required for webpack compatibility with OpenSSL 3 (https://github.com/webpack/webpack/issues/14532)
     ln -sf ${yarnDeps}/node_modules assets/node_modules
-    substituteInPlace assets/package.json --replace '$(npm bin)/' 'npx '
     npm run deploy --prefix ./assets
 
     # for external task you need a workaround for the no deps check flag

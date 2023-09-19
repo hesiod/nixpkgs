@@ -172,8 +172,8 @@ in
 
       emptyRepo = mkOption {
         type = types.bool;
-        default = false;
-        description = lib.mdDoc "If set to true, the repo won't be initialized with help files";
+        default = true;
+        description = lib.mdDoc "If set to false, the repo will be initialized with help files";
       };
 
       settings = mkOption {
@@ -278,6 +278,12 @@ in
           You can't set services.kubo.settings.Pinning.RemoteServices because the ``config replace`` subcommand used at startup does not work with it.
         '';
       }
+      {
+        assertion = !((lib.versionAtLeast cfg.package.version "0.21") && (builtins.hasAttr "Experimental" cfg.settings) && (builtins.hasAttr "AcceleratedDHTClient" cfg.settings.Experimental));
+        message = ''
+    The `services.kubo.settings.Experimental.AcceleratedDHTClient` option was renamed to `services.kubo.settings.Routing.AcceleratedDHTClient` in Kubo 0.21.
+  '';
+      }
     ];
 
     environment.systemPackages = [ cfg.package ];
@@ -331,7 +337,7 @@ in
 
       preStart = ''
         if [[ ! -f "$IPFS_PATH/config" ]]; then
-          ipfs init ${optionalString cfg.emptyRepo "-e"}
+          ipfs init --empty-repo=${lib.boolToString cfg.emptyRepo}
         else
           # After an unclean shutdown this file may exist which will cause the config command to attempt to talk to the daemon. This will hang forever if systemd is holding our sockets open.
           rm -vf "$IPFS_PATH/api"

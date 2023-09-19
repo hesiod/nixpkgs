@@ -1,15 +1,19 @@
-{ lib, stdenv, autoreconfHook, fetchFromGitHub, nix-update-script }:
+{ lib, stdenv, autoreconfHook, fetchFromGitHub, nix-update-script, fanotifySupport ? true }:
 
-stdenv.mkDerivation rec {
+stdenv.mkDerivation (finalAttrs: {
   pname = "inotify-tools";
-  version = "3.22.6.0";
+  version = "4.23.8.0";
 
   src = fetchFromGitHub {
     repo = "inotify-tools";
     owner = "inotify-tools";
-    rev = version;
-    sha256 = "sha256-EYWVSgwoMjAlc/V5kv+2jfxEqWVW/lEoIxVd+ctEMsk=";
+    rev = finalAttrs.version;
+    hash = "sha256-aD5jzUbDfB57wE1PSA3a+79owspSn7rcoRe5HsPDSXI=";
   };
+
+  configureFlags = [
+    (lib.enableFeature fanotifySupport "fanotify")
+  ];
 
   nativeBuildInputs = [ autoreconfHook ];
 
@@ -23,4 +27,4 @@ stdenv.mkDerivation rec {
     maintainers = with maintainers; [ marcweber pSub shamilton ];
     platforms = platforms.linux;
   };
-}
+})

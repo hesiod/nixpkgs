@@ -17,12 +17,12 @@
 , meta ? {}
 , passthru ? {}
 , extraBwrapArgs ? []
-, unshareUser ? true
-, unshareIpc ? true
-, unsharePid ? true
+, unshareUser ? false
+, unshareIpc ? false
+, unsharePid ? false
 , unshareNet ? false
-, unshareUts ? true
-, unshareCgroup ? true
+, unshareUts ? false
+, unshareCgroup ? false
 , dieWithParent ? true
 , ...
 } @ args:
@@ -111,7 +111,7 @@ let
   init = run: writeShellScript "${name}-init" ''
     source /etc/profile
     ${createLdConfCache}
-    exec ${lib.escapeShellArg run} "$@"
+    exec ${run} "$@"
   '';
 
   indentLines = str: lib.concatLines (map (s: "  " + s) (filter (s: s != "") (lib.splitString "\n" str)));

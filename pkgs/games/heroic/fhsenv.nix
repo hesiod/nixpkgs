@@ -1,5 +1,4 @@
-{ lib
-, buildFHSEnv
+{ buildFHSEnv
 , heroic-unwrapped
 , extraPkgs ? pkgs: [ ]
 , extraLibraries ? pkgs: [ ]
@@ -9,6 +8,12 @@ buildFHSEnv {
   name = "heroic";
 
   runScript = "heroic";
+
+  # Many Wine and native games need 32-bit libraries.
+  multiArch = true;
+
+  # required by Electron
+  unshareIpc = false;
 
   targetPkgs = pkgs: with pkgs; [
     heroic-unwrapped
@@ -81,7 +86,6 @@ buildFHSEnv {
     libpulseaudio
     libselinux
     libsndfile
-    libsndfile
     libsoup
     libtheora
     libtiff
@@ -107,7 +111,6 @@ buildFHSEnv {
     SDL2
     speex
     sqlite
-    udev
     udev
     unixODBC
     util-linux

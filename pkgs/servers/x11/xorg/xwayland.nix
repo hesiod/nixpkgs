@@ -43,11 +43,11 @@
 
 stdenv.mkDerivation rec {
   pname = "xwayland";
-  version = "23.1.1";
+  version = "23.2.0";
 
   src = fetchurl {
     url = "mirror://xorg/individual/xserver/${pname}-${version}.tar.xz";
-    sha256 = "sha256-+5Rh9cuf6l4H6RiCMRsMiLQ+iEOwF+usBeta9pqjTBU=";
+    sha256 = "sha256-fzPsKjTebmauG35Ehyw6IUYZKHLHGbms8ZKBTtur1MU=";
   };
 
   depsBuildBuild = [
@@ -108,6 +108,7 @@ stdenv.mkDerivation rec {
     description = "An X server for interfacing X11 apps with the Wayland protocol";
     homepage = "https://wayland.freedesktop.org/xserver.html";
     license = licenses.mit;
+    mainProgram = "Xwayland";
     maintainers = with maintainers; [ emantor ];
     platforms = platforms.linux;
   };

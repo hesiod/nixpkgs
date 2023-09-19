@@ -2,50 +2,48 @@
 , rustPlatform
 , fetchFromGitHub
 , pkg-config
-, bzip2
+, tailwindcss
 , oniguruma
-, openssl
-, xz
-, zstd
 , stdenv
 , darwin
 }:
 
 rustPlatform.buildRustPackage rec {
   pname = "oranda";
-  version = "0.0.3";
+  version = "0.4.0";
 
   src = fetchFromGitHub {
     owner = "axodotdev";
     repo = "oranda";
     rev = "v${version}";
-    hash = "sha256-MT0uwLDrofCFyyYiUOogF2kNs6EPS1qxPz0gdK+Tkkg=";
+    hash = "sha256-PHaqWKsZyNZnEAzEWMzJK6MD0b4O6pkYQG403ONIj0w=";
   };
 
-  cargoHash = "sha256-dAnZc1VvOubfn7mnpttaB6FotN3Xc+t9Qn0n5uzv1Qg=";
+  cargoHash = "sha256-zV7vG1mcgVusWCa4jKNLD+SqzReLZQRotk6nvzPYCU4=";
 
   nativeBuildInputs = [
     pkg-config
+    tailwindcss
   ];
 
   buildInputs = [
-    bzip2
     oniguruma
-    openssl
-    xz
-    zstd
   ] ++ lib.optionals stdenv.isDarwin [
-    darwin.apple_sdk.frameworks.Security
+    darwin.apple_sdk.frameworks.CoreServices
   ];
 
   # requires internet access
   checkFlags = [
     "--skip=build"
+    "--skip=integration"
   ];
 
   env = {
     RUSTONIG_SYSTEM_LIBONIG = true;
-    ZSTD_SYS_USE_PKG_CONFIG = true;
+    ORANDA_USE_TAILWIND_BINARY = true;
+  } // lib.optionalAttrs stdenv.isDarwin {
+    # without this, tailwindcss fails with OpenSSL configuration error
+    OPENSSL_CONF = "";
   };
 
   meta = with lib; {

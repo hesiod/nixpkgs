@@ -3,6 +3,7 @@
 , fetchpatch
 , nixosTests
 , python3
+, fetchPypi
 , radicale3
 }:
 
@@ -15,6 +16,17 @@ let
           inherit version;
           hash = "sha256-4RIMIoyi9VO0cN9KX6knq2YlhGdSYGmYGz6wqRkCaH0=";
         };
+
+        patches = [
+          # Pulling in this patch lets us continue running tests without any
+          # other changes using setuptools >= 67.5.0.
+          (fetchpatch {
+            name = "remove-deprecated-pkg-resources.patch";
+            url = "https://github.com/pallets/flask/commit/751d85f3de3f726446bb12e4ddfae885a6645ba1.patch";
+            hash = "sha256-T4vKSSe3P0xtb2/iQjm0RH2Bwk1ZHWiPoX1Ycr63EqU=";
+            includes = [ "src/flask/cli.py" ];
+          })
+        ];
       });
       flask-wtf = super.flask-wtf.overridePythonAttrs (old: rec {
         version = "0.15.1";
@@ -44,7 +56,7 @@ in python.pkgs.buildPythonApplication rec {
   pname = "etesync-dav";
   version = "0.32.1";
 
-  src = python.pkgs.fetchPypi {
+  src = fetchPypi {
     inherit pname version;
     hash = "sha256-pOLug5MnVdKaw5wedABewomID9LU0hZPCf4kZKKU1yA=";
   };

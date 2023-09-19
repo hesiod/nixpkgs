@@ -1,5 +1,4 @@
 { lib, stdenv, fetchFromGitHub, autoreconfHook, libtool
-, fetchpatch
 , threadingSupport ? true # multi-threading
 , openglSupport ? false, freeglut, libGL, libGLU # OpenGL (required for vwebp)
 , pngSupport ? true, libpng # PNG image format
@@ -28,22 +27,21 @@
 
 stdenv.mkDerivation rec {
   pname = "libwebp";
-  version = "1.3.0";
+  version = "1.3.1";
 
   src = fetchFromGitHub {
     owner  = "webmproject";
     repo   = pname;
     rev    = "v${version}";
-    hash   = "sha256-nhXkq+qKpaa75YQB/W/cRozslTIFPdXeqj1y6emQeHk=";
+    hash   = "sha256-Q94avvKjPdwdGt5ADo30cf2V4T7MCTubDHJxTtbG4xQ=";
   };
 
   patches = [
-    # https://www.mozilla.org/en-US/security/advisories/mfsa2023-13/#MFSA-TMP-2023-0001
-    (fetchpatch {
-      url = "https://github.com/webmproject/libwebp/commit/a486d800b60d0af4cc0836bf7ed8f21e12974129.patch";
-      name = "fix-msfa-tmp-2023-0001.patch";
-      hash = "sha256-TRKXpNkYVzftBw09mX+WeQRhRoOzBgXFTNZBzSdCKvc=";
-    })
+    # Commit 902bc919 from upstream, mangled slightly to apply onto 1.3.1.
+    # There is currently (2023-09-12) no confirmation that this is the fix for
+    # CVE-2023-4863, but it is linked to the right crbug, and matches the
+    # description of that (critical sev, exploited in the wild) CVE.
+    ./CVE-2023-4863.patch
   ];
 
   configureFlags = [

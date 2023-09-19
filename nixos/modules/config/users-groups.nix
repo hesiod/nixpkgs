@@ -18,11 +18,11 @@ let
 
   passwordDescription = ''
     The options {option}`hashedPassword`,
-    {option}`password` and {option}`passwordFile`
+    {option}`password` and {option}`hashedPasswordFile`
     controls what password is set for the user.
     {option}`hashedPassword` overrides both
-    {option}`password` and {option}`passwordFile`.
-    {option}`password` overrides {option}`passwordFile`.
+    {option}`password` and {option}`hashedPasswordFile`.
+    {option}`password` overrides {option}`hashedPasswordFile`.
     If none of these three options are set, no password is assigned to
     the user, and the user will not be able to do password logins.
     If the option {option}`users.mutableUsers` is true, the
@@ -250,16 +250,24 @@ let
         '';
       };
 
+      hashedPasswordFile = mkOption {
+        type = with types; nullOr str;
+        default = cfg.users.${name}.passwordFile;
+        defaultText = literalExpression "null";
+        description = lib.mdDoc ''
+          The full path to a file that contains the hash of the user's
+          password. The password file is read on each system activation. The
+          file should contain exactly one line, which should be the password in
+          an encrypted form that is suitable for the `chpasswd -e` command.
+          ${passwordDescription}
+        '';
+      };
+
       passwordFile = mkOption {
         type = with types; nullOr str;
         default = null;
-        description = lib.mdDoc ''
-          The full path to a file that contains the user's password. The password
-          file is read on each system activation. The file should contain
-          exactly one line, which should be the password in an encrypted form
-          that is suitable for the `chpasswd -e` command.
-          ${passwordDescription}
-        '';
+        visible = false;
+        description = lib.mdDoc "Deprecated alias of hashedPasswordFile";
       };
 
       initialHashedPassword = mkOption {
@@ -311,6 +319,17 @@ let
         '';
       };
 
+      expires = mkOption {
+        type = types.nullOr (types.strMatching "[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}");
+        default = null;
+        description = lib.mdDoc ''
+          Set the date on which the user's account will no longer be
+          accessible. The date is expressed in the format YYYY-MM-DD, or null
+          to disable the expiry.
+          A user whose account is locked must contact the system
+          administrator before being able to use the system again.
+        '';
+      };
     };
 
     config = mkMerge
@@ -436,9 +455,9 @@ let
     users = mapAttrsToList (_: u:
       { inherit (u)
           name uid group description home homeMode createHome isSystemUser
-          password passwordFile hashedPassword
+          password hashedPasswordFile hashedPassword
           autoSubUidGidRange subUidRanges subGidRanges
-          initialPassword initialHashedPassword;
+          initialPassword initialHashedPassword expires;
         shell = utils.toShellPath u.shell;
       }) cfg.users;
     groups = attrValues cfg.groups;
@@ -539,14 +558,12 @@ in {
 
     # systemd initrd
     boot.initrd.systemd.users = mkOption {
-      visible = false;
       description = ''
         Users to include in initrd.
       '';
       default = {};
       type = types.attrsOf (types.submodule ({ name, ... }: {
         options.uid = mkOption {
-          visible = false;
           type = types.int;
           description = ''
             ID of the user in initrd.
@@ -555,7 +572,6 @@ in {
           default = cfg.users.${name}.uid;
         };
         options.group = mkOption {
-          visible = false;
           type = types.singleLineStr;
           description = ''
             Group the user belongs to in initrd.
@@ -567,14 +583,12 @@ in {
     };
 
     boot.initrd.systemd.groups = mkOption {
-      visible = false;
       description = ''
         Groups to include in initrd.
       '';
       default = {};
       type = types.attrsOf (types.submodule ({ name, ... }: {
         options.gid = mkOption {
-          visible = false;
           type = types.int;
           description = ''
             ID of the group in initrd.
@@ -652,7 +666,7 @@ in {
       deps = [ "users" ];
       text = ''
         users=()
-        while IFS=: read -r user hash tail; do
+        while IFS=: read -r user hash _; do
           if [[ "$hash" = "$"* && ! "$hash" =~ ^\''$${cryptSchemeIdPatternGroup}\$ ]]; then
             users+=("$user")
           fi
@@ -750,7 +764,7 @@ in {
             &&
             (allowsLogin cfg.hashedPassword
              || cfg.password != null
-             || cfg.passwordFile != null
+             || cfg.hashedPasswordFile != null
              || cfg.openssh.authorizedKeys.keys != []
              || cfg.openssh.authorizedKeys.keyFiles != [])
           ) cfg.users ++ [
@@ -839,9 +853,13 @@ in {
           The password hash of user "${user.name}" may be invalid. You must set a
           valid hash or the user will be locked out of their account. Please
           check the value of option `users.users."${user.name}".hashedPassword`.''
-        else null
-      ));
-
+        else null)
+        ++ flip mapAttrsToList cfg.users (name: user:
+          if user.passwordFile != null then
+            ''The option `users.users."${name}".passwordFile' has been renamed '' +
+            ''to `users.users."${name}".hashedPasswordFile'.''
+          else null)
+      );
   };
 
 }

@@ -8,7 +8,6 @@
 , freezegun
 , jsonpickle
 , munch
-, mypy
 , pyserial
 , pytest-aiohttp
 , pytest-asyncio
@@ -21,7 +20,7 @@
 
 buildPythonPackage rec {
   pname = "plugwise";
-  version = "0.31.4";
+  version = "0.32.2";
   format = "setuptools";
 
   disabled = pythonOlder "3.7";
@@ -30,7 +29,7 @@ buildPythonPackage rec {
     owner = pname;
     repo = "python-plugwise";
     rev = "refs/tags/v${version}";
-    hash = "sha256-8DcURUJgngmBE6oPquSAHCsL1J2HAqvbtBcrqfrauHk=";
+    hash = "sha256-kJ7HbGwmA6/OtSxpkvajf+VzjYK+uq6kMaja9CmVBt4=";
   };
 
   propagatedBuildInputs = [
@@ -48,7 +47,6 @@ buildPythonPackage rec {
   nativeCheckInputs = [
     freezegun
     jsonpickle
-    mypy
     pytest-aiohttp
     pytest-asyncio
     pytestCheckHook
