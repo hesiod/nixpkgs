@@ -214,6 +214,6 @@ stdenv.mkDerivation rec {
     homepage = "https://alicevision.org";
     downloadPage = "https://github.com/alicevision/AliceVision";
     license = with licenses; [ mpl20 mit bsd2 ];
-    maintainers = with maintainers; [ tmarkus ];
+    maintainers = with maintainers; [ tmarkus gm6k ];
   };
 }
