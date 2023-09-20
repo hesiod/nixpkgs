@@ -20702,12 +20702,10 @@ with pkgs;
 
   alice-vision_3_0_0 = callPackage ../development/libraries/alice-vision/3.0.0.nix {
     inherit (llvmPackages) openmp;
-    nanoflann = nanoflann1_4_2;
   };
 
   alice-vision_3_1_0 = callPackage ../development/libraries/alice-vision/3.1.0.nix {
     inherit (llvmPackages) openmp;
-    nanoflann = nanoflann1_4_2;
   };
 
   allegro = allegro4;
@@ -24288,11 +24286,7 @@ with pkgs;
 
   nanodbc = callPackage ../development/libraries/nanodbc { };
 
-  nanoflann = nanoflann1_5_0;
-
-  nanoflann1_4_2 = callPackage ../development/libraries/nanoflann/1.4.2.nix { };
-
-  nanoflann1_5_0 = callPackage ../development/libraries/nanoflann/1.5.0.nix { };
+  nanoflann = callPackage ../development/libraries/nanoflann { };
 
   nanomsg = callPackage ../development/libraries/nanomsg { };
 
