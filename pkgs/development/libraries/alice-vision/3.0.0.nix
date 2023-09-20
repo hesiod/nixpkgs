@@ -4,6 +4,8 @@
 , cmake
 , pkg-config
 
+, pkgs
+
 , assimp
 # use the same boost as in cctag here
 , boost179
@@ -15,7 +17,6 @@
 , geogram
 , lemon-graph
 , lz4
-, nanoflann
 , openexr
 , openimageio
 , zlib
@@ -29,6 +30,19 @@
 , enableOpenCV ? true, enableOpenCVContrib ? enableOpenCV, opencv
 }:
 
+let
+  nanoflann = pkgs.nanoflann.overrideAttrs (
+    oldAttrs: rec {
+      version = "1.4.2";
+      src = fetchFromGitHub {
+        owner = "jlblancoc";
+        repo = "nanoflann";
+        rev = "v${version}";
+        hash = "sha256-znIX1S0mfOqLYPIcyVziUM1asBjENPEAdafLud1CfFI=";
+      };
+    }
+  );
+in
 stdenv.mkDerivation rec {
   pname = "alice-vision";
   version = "3.0.0";
