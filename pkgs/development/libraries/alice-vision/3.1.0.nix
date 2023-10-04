@@ -120,9 +120,6 @@ stdenv.mkDerivation rec {
       --replace \
         'alicevision_add_test(matching_test.cpp NAME "matching"          LINKS aliceVision_matching)' \
         'alicevision_add_test(matching_test.cpp NAME "matching"          LINKS aliceVision_matching lz4)'
-  '' + lib.optionalString (stdenv.hostPlatform.system == "x86_64-linux") ''
-    # -O3 currently causes segmentation faults on x86_64-linux
-    sed -i 's/-O3/-O2/' src/CMakeLists.txt
   '';
 
   # Disable warning causing compile error on certain Clang versions
@@ -154,8 +151,9 @@ stdenv.mkDerivation rec {
         ALICEVISION_BUILD_DOC = false;
         ALICEVISION_BUILD_EXAMPLES = false;
         ALICEVISION_BUILD_SOFTWARE = true;
-        # enabled alignment led to wrong initialization of Vec2 variables
-        AV_EIGEN_MEMORY_ALIGNMENT = false;
+        # CCTag package does not support alignment yet, and this must be
+        # consistent between both packages
+        AV_EIGEN_MEMORY_ALIGNMENT = ! enableCctag;
 
         ALICEVISION_BUILD_TESTS = doCheck;
 

@@ -20698,7 +20698,7 @@ with pkgs;
 
   alass = callPackage ../applications/video/alass { };
 
-  alice-vision = alice-vision_3_0_0;
+  alice-vision = alice-vision_3_1_0;
 
   alice-vision_3_0_0 = callPackage ../development/libraries/alice-vision/3.0.0.nix {
     inherit (llvmPackages) openmp;
