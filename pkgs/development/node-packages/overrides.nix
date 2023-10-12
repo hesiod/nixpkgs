@@ -29,18 +29,6 @@ final: prev: {
     buildInputs = [ final.node-gyp-build ];
   };
 
-  "@forge/cli" = prev."@forge/cli".override {
-    nativeBuildInputs = [ pkgs.pkg-config ];
-    buildInputs = with pkgs; [
-      libsecret
-      final.node-gyp-build
-      final.node-pre-gyp
-    ] ++ lib.optionals stdenv.isDarwin [
-      darwin.apple_sdk.frameworks.AppKit
-      darwin.apple_sdk.frameworks.Security
-    ];
-  };
-
   autoprefixer = prev.autoprefixer.override {
     nativeBuildInputs = [ pkgs.buildPackages.makeWrapper ];
     postInstall = ''
@@ -51,18 +39,6 @@ final: prev: {
       simple-execution = callPackage ./package-tests/autoprefixer.nix { inherit (final) autoprefixer; };
     };
   };
-
-  aws-azure-login = prev.aws-azure-login.override (oldAttrs: {
-    nativeBuildInputs = [ pkgs.buildPackages.makeWrapper ];
-    prePatch = ''
-      export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
-    '';
-    postInstall = ''
-      wrapProgram $out/bin/aws-azure-login \
-          --set PUPPETEER_EXECUTABLE_PATH ${pkgs.chromium}/bin/chromium
-    '';
-    meta = oldAttrs.meta // { platforms = lib.platforms.linux; };
-  });
 
   bower2nix = prev.bower2nix.override {
     nativeBuildInputs = [ pkgs.buildPackages.makeWrapper ];
@@ -97,7 +73,7 @@ final: prev: {
   };
 
 
-  graphite-cli = prev."@withgraphite/graphite-cli".override {
+  graphite-cli = prev."@withgraphite/graphite-cli".override (old: {
     name = "graphite-cli";
     nativeBuildInputs = with pkgs; [ installShellFiles pkg-config ];
     buildInputs = with pkgs; [ cairo pango pixman ];
@@ -108,7 +84,10 @@ final: prev: {
         --bash <($out/bin/gt completion) \
         --zsh <(ZSH_NAME=zsh $out/bin/gt completion)
     '';
-  };
+    meta = old.meta // {
+      license = lib.licenses.unfree; # no license specified
+    };
+  });
 
   graphql-language-service-cli = prev.graphql-language-service-cli.override {
     nativeBuildInputs = [ pkgs.buildPackages.makeWrapper ];
@@ -189,21 +168,6 @@ final: prev: {
       ${lib.optionalString stdenv.isLinux "patchelf --set-interpreter ${stdenv.cc.libc}/lib/ld-linux-x86-64.so.2 \"$out/lib/node_modules/makam/makam-bin-linux64\""}
     '';
   };
-
-  mermaid-cli = prev."@mermaid-js/mermaid-cli".override (
-  if stdenv.isDarwin
-  then {}
-  else {
-    nativeBuildInputs = [ pkgs.buildPackages.makeWrapper ];
-    prePatch = ''
-      export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
-    '';
-    postInstall = ''
-      wrapProgram $out/bin/mmdc \
-      --set PUPPETEER_EXECUTABLE_PATH ${pkgs.chromium.outPath}/bin/chromium
-    '';
-  });
-
 
   node-gyp = prev.node-gyp.override {
     nativeBuildInputs = [ pkgs.buildPackages.makeWrapper ];

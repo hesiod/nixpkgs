@@ -13,10 +13,7 @@
   "@astrojs/language-server" = "astro-ls";
   "@babel/cli" = "babel";
   "@commitlint/cli" = "commitlint";
-  "@forge/cli" = "forge";
   "@gitbeaker/cli" = "gitbeaker";
-  "@mermaid-js/mermaid-cli" = "mmdc";
-  "@nerdwallet/shepherd" = "shepherd";
   "@prisma/language-server" = "prisma-language-server";
   "@tailwindcss/language-server" = "tailwindcss-language-server";
   "@uppy/companion" = "companion";
@@ -38,7 +35,6 @@
   fkill-cli = "fkill";
   fleek-cli = "fleek";
   git-run = "gr";
-  gitmoji-cli = "gitmoji";
   graphql-cli = "graphql";
   graphql-language-service-cli = "graphql-lsp";
   grunt-cli = "grunt";
@@ -54,8 +50,6 @@
   prettier = "prettier";
   purescript-psa = "psa";
   purs-tidy = "purs-tidy";
-  react-native-cli = "react-native";
-  react-tools = "jsx";
   remod-cli = "remod";
   svelte-language-server = "svelteserver";
   teck-programmer = "teck-firmware-upgrade";

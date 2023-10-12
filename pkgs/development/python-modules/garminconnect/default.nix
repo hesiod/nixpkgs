@@ -10,7 +10,7 @@
 
 buildPythonPackage rec {
   pname = "garminconnect";
-  version = "0.2.4";
+  version = "0.2.8";
   format = "pyproject";
 
   disabled = pythonOlder "3.7";
@@ -19,7 +19,7 @@ buildPythonPackage rec {
     owner = "cyberjunky";
     repo = "python-garminconnect";
     rev = "refs/tags/${version}";
-    hash = "sha256-C+LldV7TyyubaH8HVdFl7NnaPSLf4bzM03+r72vkOk8=";
+    hash = "sha256-jNDFSA6Mz0+7UhEVrCKcKDEX3B7yk6igBf59A6YlW2M=";
   };
 
   nativeBuildInputs = [

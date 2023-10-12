@@ -13,16 +13,16 @@
 
 buildNpmPackage rec {
   pname = "webcord";
-  version = "4.4.0";
+  version = "4.4.2";
 
   src = fetchFromGitHub {
     owner = "SpacingBat3";
     repo = "WebCord";
     rev = "v${version}";
-    hash = "sha256-Kiw3pebjH9Pz5oi6Gbjxrjd/kvozapLNqfWLVuTXF/I=";
+    hash = "sha256-23YmyRU+xBXpC7bZtBY3RZeVpLFQ3I/Ag5Tvi3m9cIs=";
   };
 
-  npmDepsHash = "sha256-CPGfhV8VXbpX9UB5oQhI+IwFWPgYq2dGnSuyByMNGg4=";
+  npmDepsHash = "sha256-gHX5ZdcC46BwMu22G05Q8UhvZ6CtQ1HSf6KLLlN2iX0=";
 
   nativeBuildInputs = [
     copyDesktopItems
@@ -79,7 +79,7 @@ buildNpmPackage rec {
   passthru.updateScript = nix-update-script { };
 
   meta = with lib; {
-    description = "A Discord and Fosscord electron-based client implemented without Discord API";
+    description = "A Discord and SpaceBar electron-based client implemented without Discord API";
     homepage = "https://github.com/SpacingBat3/WebCord";
     downloadPage = "https://github.com/SpacingBat3/WebCord/releases";
     changelog = "https://github.com/SpacingBat3/WebCord/releases/tag/v${version}";

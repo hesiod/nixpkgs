@@ -9,11 +9,11 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "algol68g";
-  version = "3.3.22";
+  version = "3.3.24";
 
   src = fetchurl {
     url = "https://jmvdveer.home.xs4all.nl/algol68g-${finalAttrs.version}.tar.gz";
-    hash = "sha256-cSD6lngCy7SC2P7GyUCajk6i863a3vvCjtgZLF0TrIA=";
+    hash = "sha256-vSbj3YlyCs4bADpDqxAkcSC1VsoQZ2j+jIKe577WtDU=";
   };
 
   outputs = [ "out" "man" ] ++ lib.optional withPDFDoc "doc";

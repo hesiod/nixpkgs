@@ -5,13 +5,13 @@ let
 in
 buildDotnetModule rec {
   pname = "fsautocomplete";
-  version = "0.63.0";
+  version = "0.64.1";
 
   src = fetchFromGitHub {
     owner = "fsharp";
     repo = "FsAutoComplete";
     rev = "v${version}";
-    sha256 = "sha256-Or7KjJVi0N8edO+Q8bBCNrNAE974ClJfXT7Co8YXWjI=";
+    sha256 = "sha256-/1XJ09NKOlTjBLe3PvAceIIhk1AiSXenBOFjERKDZko=";
   };
 
   nugetDeps = ./deps.nix;
