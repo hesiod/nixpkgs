@@ -13,17 +13,17 @@ let
   info = lib.splitString "-" stdenv.hostPlatform.system;
   arch = lib.elemAt info 0;
   plat = lib.elemAt info 1;
-  shas =
+  hashes =
     if enableUnfree
     then {
-      x86_64-linux  = "a43d592e70f023a594f31a3fba365a9cca6611599bd61f998cb1fc38ddd177d459bce23eaf54f811fe0a87a47cdd4bf4b4d4c8008dab1ac03173371f63b91b6c";
-      x86_64-darwin = "7f7d89f438400da178b30f345b6ebc80f55f87f38b8925ca8c9dea86f0e2f23f70ccab03fdef5b83c085f1441e77592aab05006d163bc2af1920e1cc0ebdfc17";
-      aarch64-linux = "3c74d622c362e3aa72442a477ef34b0eb9131f5b550166d0f7f422bd3678acf07d75c702691d6606e5501f4b40854a352398d1c2813f1fb0a152663d75d5658b";
+      x86_64-linux  = "sha512-U5G/7wnEA6NlUYo6jo8HW7eXSxNwlbPH/SoBc8+m29SnRRFwo2V6/vPmpGjpCjjW56W2aXmYePk4n6RP+P7gJg==";
+      x86_64-darwin = "sha512-jjUWuCMppHUFNY+36rSGyjlCOtxEofBhw19roiWsLzczDyr8PjfrZStlNuXKNdd6wkhd7HQ/qNmd1PzGC928IQ==";
+      aarch64-linux = "sha512-BvkaWqv/D4akFQ3mwf0C+20KRLBKxmBZfLTINWzx0iVSqqd4mdtCpJpeNbPK1zvl17rYys+0sX5iKUkynN95Gg==";
     }
     else {
-      x86_64-linux  = "7c3f9867853582e5d06b9f895b4740abf56a9b6ce34dfbfb624cf9a4b956f489145cd13f3194a7fb16efc52410f55e797c269dc2957a35bdebf9e1aaa3547eaa";
-      x86_64-darwin = "d81c20317a7c163e42f5aad9e148505a64bba8565ff913650a840918b80e6aadde071596e569b0c8f965810b821779ca3d00f9a7cb24a5c86fff571ca9227c38";
-      aarch64-linux = "93d9700fc3dd99bc918be19fe41ef60b9071eadcc6fd57833dbf1fff2e0f2419c62f3493a0454f215b0dfd30cec90f1aca5eeff15c4eb3a583519dc9a69e896a";
+      x86_64-linux  = "sha512-uiLExBT0dRU4e7KMxHYSvqWK/5fEB/JXGGPoMXSivvJzYn9l3VMe2DPkBmjHkUSlAdScPsaRwbHE2PsMsSSwUg==";
+      x86_64-darwin = "sha512-gal8oGwIb6wz8y6QEk9knV3c4J1kkCECD0NLdbW/9jBl+dyKome3LO3VgQibwk2xISL3Be+Laaz49Z8Rdxy/dw==";
+      aarch64-linux = "sha512-ZK20GnobFLIdRjszPz9EcKTbkUDiiNN5v3lRDIMJHVyifpl5YddXzuIym4XRbabaihA4oArqux50q4+VuEGtCg==";
     };
   this = stdenv.mkDerivation rec {
     version = elk7Version;
@@ -32,7 +32,7 @@ let
 
     src = fetchurl {
       url = "https://artifacts.elastic.co/downloads/logstash/${pname}-${version}-${plat}-${arch}.tar.gz";
-      sha512 = shas.${stdenv.hostPlatform.system} or (throw "Unknown architecture");
+      hash = hashes.${stdenv.hostPlatform.system} or (throw "Unknown architecture");
     };
 
     dontBuild = true;
@@ -72,7 +72,7 @@ let
         binaryBytecode  # source bundles dependencies as jars
         binaryNativeCode  # bundled jruby includes native code
       ];
-      license = if enableUnfree then licenses.elastic else licenses.asl20;
+      license = if enableUnfree then licenses.elastic20 else licenses.asl20;
       platforms = platforms.unix;
       maintainers = with maintainers; [ wjlroe offline basvandijk ];
     };

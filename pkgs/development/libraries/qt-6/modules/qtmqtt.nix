@@ -1,14 +1,16 @@
 { qtModule
-, fetchurl
+, fetchFromGitHub
 , qtbase
 }:
 
 qtModule rec {
   pname = "qtmqtt";
-  version = "6.5.0";
-  src = fetchurl {
-    url = "https://github.com/qt/qtmqtt/archive/refs/tags/v${version}.tar.gz";
-    sha256 = "qv3GYApd4QKk/Oubx48VhG/Dbl/rvq5ua0UinPlDDNY=";
+  version = "6.5.3";
+  src = fetchFromGitHub {
+    owner = "qt";
+    repo = "qtmqtt";
+    rev = "v${version}";
+    hash = "sha256-F0rq72Cvnwy2cJmw3wUL9t8ZsnI61HBRMMWRwKdSEs8=";
   };
   qtInputs = [ qtbase ];
 }

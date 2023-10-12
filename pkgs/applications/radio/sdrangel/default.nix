@@ -24,11 +24,11 @@
 , libbladeRF
 , mbelib
 , ninja
-, ocl-icd
 , opencv3
 , pkg-config
 , qtcharts
 , qtdeclarative
+, qtgamepad
 , qtgraphicaleffects
 , qtlocation
 , qtmultimedia
@@ -41,25 +41,32 @@
 , qtwebengine
 , rtl-sdr
 , serialdv
+, sdrplay
 , sgp4
 , soapysdr-with-plugins
 , uhd
 , wrapQtAppsHook
 , zlib
+, withSDRplay ? false
 }:
 
-stdenv.mkDerivation rec {
+stdenv.mkDerivation (finalAttrs: {
   pname = "sdrangel";
-  version = "7.13.0";
+  version = "7.16.0";
 
   src = fetchFromGitHub {
     owner = "f4exb";
     repo = "sdrangel";
-    rev = "v${version}";
-    hash = "sha256-xG41FNlMfqH5MaGVFFENP0UFEkZYiWhtpNSPh2s4Irk=";
+    rev = "v${finalAttrs.version}";
+    hash = "sha256-k35TZ2H8GX3gSYyb27hTY6gHHnxPkFwp1v4OJXhvV7A=";
   };
 
-  nativeBuildInputs = [ cmake ninja pkg-config wrapQtAppsHook ];
+  nativeBuildInputs = [
+    cmake
+    ninja
+    pkg-config
+    wrapQtAppsHook
+  ];
 
   buildInputs = [
     airspy
@@ -86,6 +93,7 @@ stdenv.mkDerivation rec {
     opencv3
     qtcharts
     qtdeclarative
+    qtgamepad
     qtgraphicaleffects
     qtlocation
     qtmultimedia
@@ -102,7 +110,8 @@ stdenv.mkDerivation rec {
     soapysdr-with-plugins
     uhd
     zlib
-  ];
+  ]
+  ++ lib.optionals withSDRplay [ sdrplay ];
 
   cmakeFlags = [
     "-DAPT_DIR=${aptdec}"
@@ -112,16 +121,14 @@ stdenv.mkDerivation rec {
     "-Wno-dev"
   ];
 
-  LD_LIBRARY_PATH = "${ocl-icd}/lib";
-
-  meta = with lib; {
+  meta = {
     description = "Software defined radio (SDR) software";
+    homepage = "https://github.com/f4exb/sdrangel";
+    license = lib.licenses.gpl3Plus;
     longDescription = ''
       SDRangel is an Open Source Qt5 / OpenGL 3.0+ SDR and signal analyzer frontend to various hardware.
     '';
-    homepage = "https://github.com/f4exb/sdrangel";
-    license = licenses.gpl3Plus;
-    maintainers = with maintainers; [ alkeryn Tungsten842 ];
-    platforms = platforms.unix;
+    maintainers = with lib.maintainers; [ alkeryn Tungsten842 ];
+    platforms = lib.platforms.unix;
   };
-}
+})

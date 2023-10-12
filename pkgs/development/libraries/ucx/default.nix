@@ -1,9 +1,10 @@
 { lib, stdenv, fetchFromGitHub, autoreconfHook, doxygen, numactl
 , rdma-core, libbfd, libiberty, perl, zlib, symlinkJoin, pkg-config
-, enableCuda ? false
+, config
+, enableCuda ? config.cudaSupport
 , cudatoolkit
 , enableRocm ? false
-, rocm-core, rocm-runtime, rocm-device-libs, hip
+, rocmPackages
 }:
 
 let
@@ -12,21 +13,24 @@ let
     inherit (cudatoolkit) name meta;
     paths = [ cudatoolkit cudatoolkit.lib ];
   };
+
+  rocmList = with rocmPackages; [ rocm-core rocm-runtime rocm-device-libs clr ];
+
   rocm = symlinkJoin {
     name = "rocm";
-    paths = [ rocm-core rocm-runtime rocm-device-libs hip ];
+    paths = rocmList;
   };
 
 in
 stdenv.mkDerivation rec {
   pname = "ucx";
-  version = "1.14.0";
+  version = "1.15.0";
 
   src = fetchFromGitHub {
     owner = "openucx";
     repo = "ucx";
     rev = "v${version}";
-    sha256 = "sha256-OSYeJfMi57KABt8l3Yj0glqx54C5cwM2FqlijszJIk4=";
+    sha256 = "sha256-VxIxrk9qKM6Ncfczl4p2EhXiLNgPaYTmjhqi6/w2ZNY=";
   };
 
   nativeBuildInputs = [ autoreconfHook doxygen pkg-config ];
@@ -39,14 +43,14 @@ stdenv.mkDerivation rec {
     rdma-core
     zlib
   ] ++ lib.optional enableCuda cudatoolkit
-  ++ lib.optionals enableRocm [ rocm-core rocm-runtime rocm-device-libs hip ];
+  ++ lib.optionals enableRocm rocmList;
 
   configureFlags = [
-    "--with-rdmacm=${rdma-core}"
+    "--with-rdmacm=${lib.getDev rdma-core}"
     "--with-dc"
     "--with-rc"
     "--with-dm"
-    "--with-verbs=${rdma-core}"
+    "--with-verbs=${lib.getDev rdma-core}"
   ] ++ lib.optional enableCuda "--with-cuda=${cudatoolkit'}"
   ++ lib.optional enableRocm "--with-rocm=${rocm}";
 

@@ -1,5 +1,6 @@
 { lib
 , stdenv
+, buildPackages
 , substituteAll
 , fetchurl
 , pkg-config
@@ -7,6 +8,7 @@
 , graphene
 , gi-docgen
 , meson
+, mesonEmulatorHook
 , ninja
 , python3
 , makeWrapper
@@ -45,6 +47,7 @@
 , wayland-scanner
 , xineramaSupport ? stdenv.isLinux
 , cupsSupport ? stdenv.isLinux
+, compileSchemas ? stdenv.hostPlatform.emulatorAvailable buildPackages
 , cups
 , AppKit
 , Cocoa
@@ -64,7 +67,7 @@ in
 
 stdenv.mkDerivation rec {
   pname = "gtk4";
-  version = "4.10.3";
+  version = "4.10.4";
 
   outputs = [ "out" "dev" ] ++ lib.optionals x11Support [ "devdoc" ];
   outputBin = "dev";
@@ -76,7 +79,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "mirror://gnome/sources/gtk/${lib.versions.majorMinor version}/gtk-${version}.tar.xz";
-    sha256 = "RUVEGteeN3624KcFAm3HpGiG5GobA020CRKQnagBzqk=";
+    sha256 = "dyVABILgaF4oJl4ibGKEf05zz8qem0FqxYOCB/U3eiQ=";
   };
 
   patches = [
@@ -99,6 +102,8 @@ stdenv.mkDerivation rec {
     sassc
     gi-docgen
     libxml2 # for xmllint
+  ] ++ lib.optionals (compileSchemas && !stdenv.buildPlatform.canExecute stdenv.hostPlatform) [
+    mesonEmulatorHook
   ] ++ lib.optionals waylandSupport [
     wayland-scanner
   ] ++ setupHooks;
@@ -190,6 +195,10 @@ stdenv.mkDerivation rec {
   };
 
   postPatch = ''
+    # this conditional gates the installation of share/gsettings-schemas/.../glib-2.0/schemas/gschemas.compiled.
+    substituteInPlace meson.build \
+      --replace 'if not meson.is_cross_build()' 'if ${lib.boolToString compileSchemas}'
+
     files=(
       build-aux/meson/gen-demo-header.py
       demos/gtk-demo/geninclude.py

@@ -11,25 +11,29 @@
 , qt5compat
 , makeWrapper
 , wrapQtAppsHook
+, botan2
+, pkg-config
+, nixosTests
 }:
 
 let
   pname = "qownnotes";
   appname = "QOwnNotes";
-  version = "23.5.0";
+  version = "23.10.0";
 in
 stdenv.mkDerivation {
   inherit pname appname version;
 
   src = fetchurl {
-    url = "https://download.tuxfamily.org/${pname}/src/${pname}-${version}.tar.xz";
-    hash = "sha256-W1bu3isEe1j7XTj+deLNk6Ncssy2UKG+eF36fe1FFWs=";
+    url = "https://github.com/pbek/QOwnNotes/releases/download/v${version}/qownnotes-${version}.tar.xz";
+    hash = "sha256-wPZrKAWaWv88BeVu6e73b9/Ydo0ew4GLig46fyNSxtc=";
   };
 
   nativeBuildInputs = [
     qmake
     qttools
     wrapQtAppsHook
+    pkg-config
   ] ++ lib.optionals stdenv.isDarwin [ makeWrapper ];
 
   buildInputs = [
@@ -38,7 +42,12 @@ stdenv.mkDerivation {
     qtsvg
     qtwebsockets
     qt5compat
+    botan2
   ] ++ lib.optionals stdenv.isLinux [ qtwayland ];
+
+  qmakeFlags = [
+    "USE_SYSTEM_BOTAN=1"
+  ];
 
   postInstall =
   # Create a lowercase symlink for Linux
@@ -51,6 +60,9 @@ stdenv.mkDerivation {
     mv $out/bin/${appname}.app $out/Applications
     makeWrapper $out/Applications/${appname}.app/Contents/MacOS/${appname} $out/bin/${pname}
   '';
+
+  # Tests QOwnNotes using the NixOS module by launching xterm:
+  passthru.tests.basic-nixos-module-functionality = nixosTests.qownnotes;
 
   meta = with lib; {
     description = "Plain-text file notepad and todo-list manager with markdown support and Nextcloud/ownCloud integration";

@@ -1,9 +1,9 @@
 { lib, buildGoModule, fetchFromGitHub, fetchzip, installShellFiles, stdenv }:
 
 let
-  version = "2.0.0-rc.2";
-  sha256 = "0b7ls2amzmfjy6hw6kwcmhjj2wdara4igwk2wby6ah2yj5nipb45";
-  manifestsSha256 = "1xj0g65czl20j8axi6n07sm9ijzmr7vhczfdpx4xqx6m3bl9vqxs";
+  version = "2.1.1";
+  sha256 = "11g7zkzx28xi81qk00frpxn9qsp4m0pr7m1zm61p2in3i9qxrqjn";
+  manifestsSha256 = "1zpw9yh5j9ymhj771ccr7a3zm37h3igcrl0xnzyzzrkg754wdv9s";
 
   manifests = fetchzip {
     url =
@@ -23,7 +23,7 @@ in buildGoModule rec {
     inherit sha256;
   };
 
-  vendorSha256 = "sha256-HWKpaMHBX8wvG2aDX/U9lI9KNMcbBNxxG3yigYa+VX8=";
+  vendorHash = "sha256-CQt8GbUUUOLUExysZK2H6YZzMx+pXEroGj30BXAhPRY=";
 
   postUnpack = ''
     cp -r ${manifests} source/cmd/flux/manifests

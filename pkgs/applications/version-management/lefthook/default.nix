@@ -6,7 +6,7 @@
 
 let
   pname = "lefthook";
-  version = "1.3.13";
+  version = "1.5.2";
 in
 buildGoModule rec {
   inherit pname version;
@@ -15,10 +15,10 @@ buildGoModule rec {
     owner = "evilmartians";
     repo = "lefthook";
     rev = "v${version}";
-    hash = "sha256-zEY8iFF3SyZrIWveUWW3dvWnZL4h7rQ8EcMNIcWJ5g8=";
+    hash = "sha256-9lAgKHcUAhg3Z8fMNYu3JrjfSd0HaT7YhvjKlpLMi0E=";
   };
 
-  vendorHash = "sha256-UMT39If9Oa7vgpkW2oltCUkaNQ0Qf1nCO5Z8F8SaajA=";
+  vendorHash = "sha256-/VLS7+nPERjIU7V2CzqXH69Z3/y+GKZbAFn+KcRKRuA=";
 
   nativeBuildInputs = [ installShellFiles ];
 
@@ -38,6 +38,7 @@ buildGoModule rec {
     homepage = "https://github.com/evilmartians/lefthook";
     changelog = "https://github.com/evilmartians/lefthook/raw/v${version}/CHANGELOG.md";
     license = lib.licenses.mit;
+    mainProgram = "lefthook";
     maintainers = with lib.maintainers; [ AndersonTorres ];
   };
 }

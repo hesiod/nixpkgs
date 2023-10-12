@@ -14,14 +14,14 @@
 
 buildPythonPackage rec {
   pname = "google-cloud-dataproc";
-  version = "5.4.1";
+  version = "5.5.1";
   format = "setuptools";
 
   disabled = pythonOlder "3.7";
 
   src = fetchPypi {
     inherit pname version;
-    hash = "sha256-GJbhT2PBIaPx4sIhKHzH/QBlDSpz+LOPggQK5tWqt78=";
+    hash = "sha256-+tfaWdOR/sFfGih71x1VznI3gZ2quQ4h1rEUCFHZ1DQ=";
   };
 
   propagatedBuildInputs = [
@@ -53,6 +53,6 @@ buildPythonPackage rec {
     homepage = "https://github.com/googleapis/python-dataproc";
     changelog = "https://github.com/googleapis/python-dataproc/blob/v${version}/CHANGELOG.md";
     license = licenses.asl20;
-    maintainers = with maintainers; [ SuperSandro2000 ];
+    maintainers = with maintainers; [ ];
   };
 }

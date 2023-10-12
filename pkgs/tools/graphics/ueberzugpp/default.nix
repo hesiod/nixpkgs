@@ -14,28 +14,36 @@
 , vips
 , nlohmann_json
 , libsixel
-, microsoft_gsl
+, microsoft-gsl
+, chafa
+, enableOpencv ? stdenv.isLinux
 , opencv
+, enableWayland ? stdenv.isLinux
+, extra-cmake-modules
+, wayland
+, wayland-protocols
+, enableX11 ? stdenv.isLinux
 , xorg
-, withOpencv ? stdenv.isLinux
-, withX11 ? stdenv.isLinux
+, withoutStdRanges ? stdenv.isDarwin
+, range-v3
 }:
 
 stdenv.mkDerivation rec {
   pname = "ueberzugpp";
-  version = "2.8.3";
+  version = "2.9.2";
 
   src = fetchFromGitHub {
     owner = "jstkdng";
     repo = "ueberzugpp";
     rev = "v${version}";
-    hash = "sha256-U6jw1VQmc/E/vXBCVvjBsmLjhVf0MFuK+FK8jnEEl1M=";
+    hash = "sha256-yIohpJRytmwt+6DLCWpmBiuCm9GcCHsGmpTI64/3d8U=";
   };
+
+  strictDeps = true;
 
   nativeBuildInputs = [
     cmake
     pkg-config
-    cli11
   ];
 
   buildInputs = [
@@ -49,17 +57,27 @@ stdenv.mkDerivation rec {
     vips
     nlohmann_json
     libsixel
-    microsoft_gsl
-  ] ++ lib.optionals withOpencv [
+    microsoft-gsl
+    chafa
+    cli11
+  ] ++ lib.optionals enableOpencv [
     opencv
-  ] ++ lib.optionals withX11 [
+  ] ++ lib.optionals enableWayland [
+    extra-cmake-modules
+    wayland
+    wayland-protocols
+  ] ++ lib.optionals enableX11 [
     xorg.libX11
     xorg.xcbutilimage
+  ] ++ lib.optionals withoutStdRanges [
+    range-v3
   ];
 
-  cmakeFlags = lib.optionals (!withOpencv) [
+  cmakeFlags = lib.optionals (!enableOpencv) [
     "-DENABLE_OPENCV=OFF"
-  ] ++ lib.optionals (!withX11) [
+  ] ++ lib.optionals enableWayland [
+    "-DENABLE_WAYLAND=ON"
+  ] ++ lib.optionals (!enableX11) [
     "-DENABLE_X11=OFF"
   ];
 
@@ -72,7 +90,6 @@ stdenv.mkDerivation rec {
     description = "Drop in replacement for ueberzug written in C++";
     homepage = "https://github.com/jstkdng/ueberzugpp";
     license = licenses.gpl3Plus;
-    mainProgram = "ueberzug";
     maintainers = with maintainers; [ aleksana wegank ];
     platforms = platforms.unix;
   };

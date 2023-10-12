@@ -51,13 +51,13 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "mutter";
-  version = "43.5";
+  version = "43.8";
 
   outputs = [ "out" "dev" "man" "devdoc" ];
 
   src = fetchurl {
     url = "mirror://gnome/sources/mutter/${lib.versions.major finalAttrs.version}/mutter-${finalAttrs.version}.tar.xz";
-    sha256 = "/JAP4ahA2aeTyOLSDUTJCqCH1fv9x5Su5wluHYoJZxo=";
+    sha256 = "TjTh8XWTS9hJqEvZX6Nb8G6EEuAt8loDbC8RNdUz8oE=";
   };
 
   patches = [
@@ -74,7 +74,7 @@ stdenv.mkDerivation (finalAttrs: {
     "-Dinstalled_tests=false" # TODO: enable these
     "-Dwayland_eglstream=true"
     "-Dprofiler=true"
-    "-Dxwayland_path=${xwayland}/bin/Xwayland"
+    "-Dxwayland_path=${lib.getExe xwayland}"
     # This should be auto detected, but it looks like it manages a false
     # positive.
     "-Dxwayland_initfd=disabled"
@@ -102,6 +102,7 @@ stdenv.mkDerivation (finalAttrs: {
     wrapGAppsHook
     gi-docgen
     xorgserver
+    gobject-introspection
   ];
 
   buildInputs = [
@@ -110,7 +111,6 @@ stdenv.mkDerivation (finalAttrs: {
     glib
     gnome-desktop
     gnome-settings-daemon
-    gobject-introspection
     gsettings-desktop-schemas
     gtk3
     libcanberra

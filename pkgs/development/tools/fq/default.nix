@@ -7,16 +7,16 @@
 
 buildGoModule rec {
   pname = "fq";
-  version = "0.5.0";
+  version = "0.8.0";
 
   src = fetchFromGitHub {
     owner = "wader";
     repo = "fq";
     rev = "v${version}";
-    hash = "sha256-Fg5J/iLxGUwb2QRZJMHLqK9dBECW9VsiZGX+LyUtyhw=";
+    hash = "sha256-7q08fQUFy4qX3VqUHuvOZuVQdFeoeo5+7HUQ4WWMWYw=";
   };
 
-  vendorHash = "sha256-sjzGtSBgRybcJvOXM4wKN5pTgihNrjUCMPsc62n3tLk=";
+  vendorHash = "sha256-7TGdbGVx7YTuYBmHYK0dqccxSTkLzUlBk21EREv9XBA=";
 
   ldflags = [
     "-s"

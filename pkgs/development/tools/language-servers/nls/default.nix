@@ -1,16 +1,13 @@
-{ lib
-, rustPlatform
+{ symlinkJoin
 , nickel
 }:
 
-rustPlatform.buildRustPackage {
+symlinkJoin {
+  name = "nls-${nickel.version}";
   pname = "nls";
+  inherit (nickel) version;
 
-  inherit (nickel) src version;
-
-  cargoHash = "sha256-tahSuSc16oUUjeBBAnTDAiSaLr0zMKgN/XvypXqvvxw=";
-
-  cargoBuildFlags = [ "-p nickel-lang-lsp" ];
+  paths = [ nickel.nls ];
 
   meta = {
     inherit (nickel.meta) homepage changelog license maintainers;

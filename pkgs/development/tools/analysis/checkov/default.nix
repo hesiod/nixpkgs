@@ -22,14 +22,14 @@ with py.pkgs;
 
 buildPythonApplication rec {
   pname = "checkov";
-  version = "2.3.246";
+  version = "2.5.6";
   format = "setuptools";
 
   src = fetchFromGitHub {
     owner = "bridgecrewio";
     repo = pname;
     rev = "refs/tags/${version}";
-    hash = "sha256-IDyDvwpCB/rZkaAWmAvudctT3FDDCKentqJVfM/YV7s=";
+    hash = "sha256-X+JEhoFKT+nxgxABojC8jZiGp8bubJWi0qWNfU9kwDc=";
   };
 
   patches = [
@@ -37,11 +37,12 @@ buildPythonApplication rec {
   ];
 
   pythonRelaxDeps = [
-    "dpath"
     "bc-detect-secrets"
     "bc-python-hcl2"
-    "pycep-parser"
+    "dpath"
+    "license-expression"
     "networkx"
+    "pycep-parser"
   ];
 
   nativeBuildInputs = [
@@ -64,7 +65,6 @@ buildPythonApplication rec {
     colorama
     configargparse
     cyclonedx-python-lib
-    deep_merge
     docker
     dockerfile-parse
     dpath
@@ -74,6 +74,7 @@ buildPythonApplication rec {
     jmespath
     jsonschema
     junit-xml
+    license-expression
     networkx
     openai
     packaging
@@ -81,7 +82,9 @@ buildPythonApplication rec {
     prettytable
     pycep-parser
     pyyaml
+    rustworkx
     semantic-version
+    spdx-tools
     tabulate
     termcolor
     tqdm

@@ -16,12 +16,12 @@ let
   info = splitString "-" stdenv.hostPlatform.system;
   arch = elemAt info 0;
   plat = elemAt info 1;
-  shas =
+  hashes =
     {
-      x86_64-linux   = "f49d8fce010db83e6a89462535c71ba11a1153589038a7db430fc7db44178a55d5538dea80e6d4c690f4f0e838168965297c6a3ae31fbc5020af4d966067a90c";
-      x86_64-darwin  = "b7d87bfa2e1793354bfb51ea11bbeeb29cfba62633288c3ed4ab9eecc05d05953db9446e7ca46ffe63f5aa646a0534fb8f4aa897a59fa2ae7e200b824576d915";
-      aarch64-linux  = "aa9624c1777a8530f5eca4f75385de1a95ba8db3d56810cc1e134434438181580c32f5f46ab79094742d077e9b741cfb2549cda549147123dae14109e27a1443";
-      aarch64-darwin = "191e04a1e440a5ad679d04f6d852a6ab26cb14870b8af38a2ab6a14251a7b6d1ed7646e33b87f4971bb04a68d767abaecaa8dba07e3ae29211f0a358bb499d61";
+      x86_64-linux   = "sha512-eiAT5Dx/w56GoxpzPMdMWH7yu6DAE/lc6HT5i0iKT48Ob7JUoe7dXAsOIQrtmgGV9zWPqWU8iQ4jRBP/kxkIBw==";
+      x86_64-darwin  = "sha512-5vSefA9Z4mCz49Q+Vzdck1KXbE9REYAF46kSf0G1n5XlHqFYzTGOmUEObZhGTqH4RDLJBdEqhLj2iyzjWQX5RA==";
+      aarch64-linux  = "sha512-8nkPSbecOBJGu/h0MZGUUq+Tqk/YqmvJwfkDHn7V2cZJ9bq4Z8KKfRYC4ihdP0pfePgJrAV0SwKtZ9aGELtnfQ==";
+      aarch64-darwin = "sha512-dbZrYGULuC3FF/SllPpAgW077Lkr87NJ8+gyTMayl8i8rOvAjnZhiR/U7eA6CZ/qVsFQkpGATdAzRXF8NlZBcg==";
     };
 in
 stdenv.mkDerivation rec {
@@ -30,7 +30,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "https://artifacts.elastic.co/downloads/elasticsearch/${pname}-${version}-${plat}-${arch}.tar.gz";
-    sha512 = shas.${stdenv.hostPlatform.system} or (throw "Unknown architecture");
+    hash = hashes.${stdenv.hostPlatform.system} or (throw "Unknown architecture");
   };
 
   patches = [ ./es-home-6.x.patch ];
@@ -76,7 +76,7 @@ stdenv.mkDerivation rec {
       binaryBytecode
       binaryNativeCode
     ];
-    license = licenses.elastic;
+    license = licenses.elastic20;
     platforms = platforms.unix;
     maintainers = with maintainers; [ apeschar basvandijk ];
   };

@@ -1,27 +1,30 @@
 { lib
 , fetchFromGitHub
 , buildGoModule
+, nixosTests
 }:
 
 buildGoModule rec {
   pname = "mediamtx";
-  version = "0.22.2";
+  version = "1.1.1";
 
   src = fetchFromGitHub {
-    owner = "aler9";
+    owner = "bluenviron";
     repo = pname;
     rev = "v${version}";
-    hash = "sha256-NGUEDOME6jzckHrzOboQr5KrZ8Z4iLCTHGCRGhbQThU=";
+    hash = "sha256-VIXrptVF5kjjz9vHqqjAM5gYk2o/wkUvudXixCloPgE=";
   };
 
-  vendorHash = "sha256-7+0+F1dW70GXjOzJ/+KTFZPp8o1w2wDvQlX0Zrrx7qU=";
+  vendorHash = "sha256-bUZU9I2lqjMOupkCQKSfdrWsBYmAVrLEXod0l+J3p6g=";
 
   # Tests need docker
   doCheck = false;
 
   ldflags = [
-    "-X github.com/aler9/mediamtx/internal/core.version=v${version}"
+    "-X github.com/bluenviron/mediamtx/internal/core.version=v${version}"
   ];
+
+  passthru.tests = { inherit (nixosTests) mediamtx; };
 
   meta = with lib; {
     description =
@@ -29,7 +32,7 @@ buildGoModule rec {
     ;
     inherit (src.meta) homepage;
     license = licenses.mit;
-    maintainers = with maintainers; [ ];
+    mainProgram = "mediamtx";
+    maintainers = with maintainers; [ fpletz ];
   };
-
 }

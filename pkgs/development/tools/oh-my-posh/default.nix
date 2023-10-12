@@ -6,18 +6,18 @@
 
 buildGoModule rec {
   pname = "oh-my-posh";
-  version = "16.7.0";
+  version = "18.10.3";
 
   src = fetchFromGitHub {
     owner = "jandedobbeleer";
     repo = pname;
     rev = "refs/tags/v${version}";
-    hash = "sha256-4jbZDCQTeqotR7X1gPPcwPrd8vqVS0Xrl/gZKIW49dY=";
+    hash = "sha256-gNSG4jGGkvLyitqO4o44tv/nRGzOcX5haLUFdj/PqBM=";
   };
 
-  vendorHash = "sha256-KdvZ0OY6iJYwdK0oKqBp7bYlCe7F5BUfSWTEIMbkZcA=";
+  vendorHash = "sha256-ia5uglahH4btHYqeG3yyStOoM1ALxm/lQ+pyc0oxIwE=";
 
-  sourceRoot = "source/src";
+  sourceRoot = "${src.name}/src";
 
   nativeBuildInputs = [
     installShellFiles
@@ -26,7 +26,8 @@ buildGoModule rec {
   ldflags = [
     "-s"
     "-w"
-    "-X main.Version=${version}"
+    "-X github.com/jandedobbeleer/oh-my-posh/src/build.Version=${version}"
+    "-X github.com/jandedobbeleer/oh-my-posh/src/build.Date=1970-01-01T00:00:00Z"
   ];
 
   tags = [

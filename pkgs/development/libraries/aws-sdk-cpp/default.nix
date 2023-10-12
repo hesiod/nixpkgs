@@ -24,13 +24,13 @@ in
 
 stdenv.mkDerivation rec {
   pname = "aws-sdk-cpp";
-  version = "1.11.37";
+  version = "1.11.118";
 
   src = fetchFromGitHub {
     owner = "aws";
     repo = "aws-sdk-cpp";
     rev = version;
-    sha256 = "sha256-C1PdLNagoIMk9/AAV2Pp7kWcspasJtN9Tx679FnEprc=";
+    sha256 = "sha256-jqGXh8xLD2gIjV9kSvlldrxA5TxTTXQoC/B66FVprvk=";
   };
 
   patches = [
@@ -38,6 +38,14 @@ stdenv.mkDerivation rec {
   ];
 
   postPatch = ''
+    # Append the dev output to path hints in finding Aws.h to avoid
+    # having to pass `AWS_CORE_HEADER_FILE` explicitly to cmake configure
+    # when using find_package(AWSSDK CONFIG)
+    substituteInPlace cmake/AWSSDKConfig.cmake \
+      --replace 'C:/AWSSDK/''${AWSSDK_INSTALL_INCLUDEDIR}/aws/core' \
+        'C:/AWSSDK/''${AWSSDK_INSTALL_INCLUDEDIR}/aws/core"
+            "${placeholder "dev"}/include/aws/core'
+
     # Avoid blanket -Werror to evade build failures on less
     # tested compilers.
     substituteInPlace cmake/compiler_settings.cmake \
@@ -45,6 +53,8 @@ stdenv.mkDerivation rec {
 
     # Flaky on Hydra
     rm tests/aws-cpp-sdk-core-tests/aws/auth/AWSCredentialsProviderTest.cpp
+    rm tests/aws-cpp-sdk-core-tests/aws/client/AWSClientTest.cpp
+    rm tests/aws-cpp-sdk-core-tests/aws/client/AwsConfigTest.cpp
     # Includes aws-c-auth private headers, so only works with submodule build
     rm tests/aws-cpp-sdk-core-tests/aws/auth/AWSAuthSignerTest.cpp
     # TestRandomURLMultiThreaded fails
@@ -87,10 +97,6 @@ stdenv.mkDerivation rec {
     # openssl 3 generates several deprecation warnings
     "-Wno-error=deprecated-declarations"
   ];
-
-  # aws-cpp-sdk-core-tests/aws/client/AWSClientTest.cpp
-  # seem to have a datarace
-  enableParallelChecking = false;
 
   postFixupHooks = [
     # This bodge is necessary so that the file that the generated -config.cmake file

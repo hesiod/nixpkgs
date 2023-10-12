@@ -9,21 +9,14 @@ in {
   nodes.machine = {
     services.syncthing = {
       enable = true;
-      settings = {
-        options.crashReportingEnabled = false;
-        devices.testDevice = {
-          id = testId;
-        };
-        folders.testFolder = {
-          path = "/tmp/test";
-          devices = [ "testDevice" ];
-          versioning = {
-            type = "simple";
-            params.keep = "10";
-          };
-        };
-        gui.user = "guiUser";
+      settings.devices.testDevice = {
+        id = testId;
       };
+      settings.folders.testFolder = {
+        path = "/tmp/test";
+        devices = [ "testDevice" ];
+      };
+      settings.gui.user = "guiUser";
     };
   };
 

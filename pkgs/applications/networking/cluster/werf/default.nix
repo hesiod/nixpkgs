@@ -10,16 +10,16 @@
 
 buildGoModule rec {
   pname = "werf";
-  version = "1.2.231";
+  version = "1.2.263";
 
   src = fetchFromGitHub {
     owner = "werf";
     repo = "werf";
     rev = "v${version}";
-    hash = "sha256-tiIfdODyUH3RoB1Htono2ZgN8+kiM1BXpNPn2B9V/mk=";
+    hash = "sha256-eWiUn6v7XZZH7rudvCMLa3rUBmMsiSUKcwoDCFxRlFE=";
   };
 
-  vendorHash = "sha256-SRNxV3zRYfbMJB4iGic3lu25VXIrl5011rB6AYqZG8U=";
+  vendorHash = "sha256-0bxM0Y4K6wxg6Ka1A9MusptiSMshTUWJItXoVDpo7lI=";
 
   proxyVendor = true;
 
@@ -64,10 +64,6 @@ buildGoModule rec {
       integration/suites \
       pkg/true_git/*test.go \
       test/e2e
-
-    # Remove failing tests.
-    rm -rf \
-      cmd/werf/docs/replacers/kubectl/kubectl_test.go
   '' + lib.optionalString (CGO_ENABLED == 0) ''
     # A workaround for osusergo.
     export USER=nixbld

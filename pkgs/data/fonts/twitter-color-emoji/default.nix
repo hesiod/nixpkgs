@@ -10,7 +10,7 @@
 , python3
 , which
 , zopfli
-, noto-fonts-emoji
+, noto-fonts-color-emoji
 }:
 
 let
@@ -33,15 +33,15 @@ stdenv.mkDerivation rec {
   inherit version;
 
   srcs = [
-    noto-fonts-emoji.src
+    noto-fonts-color-emoji.src
     twemojiSrc
   ];
 
-  sourceRoot = noto-fonts-emoji.src.name;
+  sourceRoot = noto-fonts-color-emoji.src.name;
 
   postUnpack = ''
     chmod -R +w ${twemojiSrc.name}
-    mv ${twemojiSrc.name} ${noto-fonts-emoji.src.name}
+    mv ${twemojiSrc.name} ${noto-fonts-color-emoji.src.name}
   '';
 
   nativeBuildInputs = [
@@ -67,7 +67,7 @@ stdenv.mkDerivation rec {
       "s#http://scripts.sil.org/OFL#http://creativecommons.org/licenses/by/4.0/#"
     ];
   in ''
-    ${noto-fonts-emoji.postPatch}
+    ${noto-fonts-color-emoji.postPatch}
 
     sed '${templateSubstitutions}' NotoColorEmoji.tmpl.ttx.tmpl > TwitterColorEmoji.tmpl.ttx.tmpl
     pushd ${twemojiSrc.name}/assets/72x72/
@@ -111,6 +111,6 @@ stdenv.mkDerivation rec {
     # In Fedora twitter-twemoji-fonts source
     ## spec files are MIT: https://fedoraproject.org/wiki/Licensing:Main#License_of_Fedora_SPEC_Files
     license = with licenses; [ asl20 ofl cc-by-40 mit ];
-    maintainers = with maintainers; [ jtojnar emily ];
+    maintainers = with maintainers; [ emily ];
   };
 }
