@@ -18,14 +18,14 @@ let
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "dawarich";
-  version = "0.30.6";
+  version = "0.32.0";
 
   src = applyPatches {
     src = fetchFromGitHub {
       owner = "Freika";
       repo = "dawarich";
       tag = finalAttrs.version;
-      hash = "sha256-2WXu7Y2lujRvi0fFaUEIp5qTEV4AC5zsGV5vtQ/oiNo=";
+      hash = "sha256-JuH6+uhx+jWX7SS0+itgyvfPf+RBOpXOOLCKACHdvvg=";
 
     };
     postPatch = ''
