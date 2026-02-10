@@ -746,6 +746,7 @@
   ./services/logging/ulogd.nix
   ./services/logging/vector.nix
   ./services/mail/automx2.nix
+  ./services/mail/bichon.nix
   ./services/mail/cyrus-imap.nix
   ./services/mail/davmail.nix
   ./services/mail/dkimproxy-out.nix

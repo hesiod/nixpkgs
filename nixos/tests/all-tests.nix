@@ -275,6 +275,7 @@ in
   bees = runTest ./bees.nix;
   benchexec = runTest ./benchexec.nix;
   beszel = runTest ./beszel.nix;
+  bichon = runTest ./bichon.nix;
   binary-cache = runTest {
     imports = [ ./binary-cache.nix ];
     _module.args.compression = "zstd";
