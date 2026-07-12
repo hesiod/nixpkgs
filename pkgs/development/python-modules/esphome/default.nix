@@ -1,13 +1,13 @@
 {
   lib,
   stdenv,
-  callPackage,
   buildPythonPackage,
   fetchFromGitHub,
   installShellFiles,
   git,
   versionCheckHook,
   nixosTests,
+  nix-update-script,
 
   # dependencies
   aioesphomeapi,
@@ -24,6 +24,7 @@
   jinja2,
   paho-mqtt,
   pillow,
+  platformdirs,
   platformio,
   platformio-core,
   puremagic,
@@ -56,9 +57,6 @@
 }:
 
 let
-  # NOTE 2026-06-25: Legacy dashboard will be removed in next major release after 2026.6.x
-  esphome-dashboard = callPackage ./dashboard.nix { };
-
   paho-mqtt' = paho-mqtt.overridePythonAttrs (oldAttrs: rec {
     version = "1.6.1";
     src = fetchFromGitHub {
@@ -73,14 +71,14 @@ in
 
 buildPythonPackage (finalAttrs: {
   pname = "esphome";
-  version = "2026.6.2";
+  version = "2026.7.0b1";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "esphome";
     repo = "esphome";
     tag = finalAttrs.version;
-    hash = "sha256-h7aMPSXmIUutCGMoZlE3Z1wX2xNxdmZsHfBllcFHBHc=";
+    hash = "sha256-fQuDZZ8YYqvTt5wu7zjrmKyp72yHF+nIAENUZqqi/vM=";
   };
 
   patches = [
@@ -116,8 +114,7 @@ buildPythonPackage (finalAttrs: {
 
   postPatch = ''
     substituteInPlace pyproject.toml \
-      --replace-fail "setuptools==82.0.1" "setuptools" \
-      --replace-fail "wheel>=0.43,<0.48" "wheel"
+      --replace-fail "setuptools==83.0.0" "setuptools"
   '';
 
   # Remove esptool and platformio from requirements
@@ -131,13 +128,13 @@ buildPythonPackage (finalAttrs: {
     click
     colorama
     cryptography
-    esphome-dashboard
     esphome-glyphsets
     freetype-py
     icmplib
     jinja2
     paho-mqtt'
     pillow
+    platformdirs
     platformio
     puremagic
     py7zr
@@ -221,6 +218,7 @@ buildPythonPackage (finalAttrs: {
     "test_clean_build_empty_cache_dir"
     "test_clean_all"
     "test_clean_all_partial_exists"
+    "test_resolve_registry_version_raises_without_pkg_file"
     # tries to use esptool, which is wrapped in an fhsenv
     "test_upload_using_esptool_passes_crystal_callback"
     "test_upload_using_esptool_path_conversion"
@@ -242,8 +240,7 @@ buildPythonPackage (finalAttrs: {
   ];
 
   passthru = {
-    dashboard = esphome-dashboard;
-    updateScript = callPackage ./update.nix { };
+    updateScript = nix-update-script { };
     tests = { inherit (nixosTests) esphome; };
   };
 
