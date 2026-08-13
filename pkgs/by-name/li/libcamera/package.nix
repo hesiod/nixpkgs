@@ -13,8 +13,6 @@
   libyaml,
   gst_all_1,
   gtest,
-  graphviz,
-  doxygen,
   python3,
   python3Packages,
   udev,
@@ -24,6 +22,9 @@
   withQcam ? false,
   qt6, # withQcam
   libtiff, # withQcam
+  withDocumentation ? false,
+  graphviz,
+  doxygen,
 }:
 
 stdenv.mkDerivation (finalAttrs: {
@@ -104,31 +105,40 @@ stdenv.mkDerivation (finalAttrs: {
     python3Packages.jinja2
     python3Packages.pyyaml
     python3Packages.ply
+    openssl
+  ]
+  ++ lib.optional withQcam qt6.wrapQtAppsHook
+  ++ lib.optional withDocumentation [
     python3Packages.sphinx
     graphviz
     doxygen
-    openssl
-  ]
-  ++ lib.optional withQcam qt6.wrapQtAppsHook;
-
-  mesonFlags = [
-    "-Dv4l2=true"
-    (lib.mesonEnable "tracing" withTracing)
-    (lib.mesonEnable "qcam" withQcam)
-    "-Dlibunwind=disabled"
-    "-Dlc-compliance=disabled" # tries unconditionally to download gtest when enabled
-    # Avoid blanket -Werror to evade build failures on less
-    # tested compilers.
-    "-Dwerror=false"
-    # Documentation breaks binary compatibility.
-    # Given that upstream also provides public documentation,
-    # we can disable it here.
-    "-Ddocumentation=disabled"
-  ]
-  ++ lib.optionals stdenv.hostPlatform.isAarch [
-    # we don't have tensorflow-lite to build this
-    "-Drpi-awb-nn=disabled"
   ];
+
+  mesonFlags =
+    lib.mapAttrsToList lib.mesonEnable {
+      v4l2 = true;
+      tracing = withTracing;
+      cam = true;
+      qcam = withQcam;
+      pycamera = true;
+      libunwind = false;
+      lc-compliance = true;
+
+      # Documentation breaks binary compatibility.
+      # Given that upstream also provides public documentation,
+      # we can disable it here.
+      documentation = withDocumentation;
+
+      # tensorflow-lite is broken
+      rpi-awb-nn = false;
+    }
+    ++ [
+      (lib.mesonBool "test" finalAttrs.finalPackage.doCheck)
+
+      # Avoid blanket -Werror to evade build failures on less
+      # tested compilers.
+      (lib.mesonBool "werror" false)
+    ];
 
   env = {
     # Fixes error on a deprecated declaration
