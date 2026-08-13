@@ -17,6 +17,8 @@
   python3Packages,
   udev,
   libpisp,
+  libyuv,
+  libjpeg,
   withTracing ? lib.meta.availableOn stdenv.hostPlatform lttng-ust,
   lttng-ust, # withTracing
   withQcam ? false,
@@ -88,6 +90,10 @@ stdenv.mkDerivation (finalAttrs: {
     libyaml
 
     gtest
+
+    # for virtual pipeline
+    libyuv
+    libjpeg
   ]
   ++ lib.optionals stdenv.hostPlatform.isAarch [ libpisp ]
   ++ lib.optionals withTracing [ lttng-ust ]
