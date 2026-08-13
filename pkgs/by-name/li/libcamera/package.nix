@@ -31,14 +31,14 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "libcamera";
-  version = "0.7.0";
+  version = "0.7.2";
 
   src = fetchFromGitLab {
     domain = "gitlab.freedesktop.org";
     owner = "camera";
     repo = "libcamera";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-W9pRE8/0Cf2EEP5bbvy4FsDSeKKSklfJb6T48ZN4dzE=";
+    hash = "sha256-vhFkeT1j2KKm+CVvGrtH5BEYJSEdaX7N7DRdA0a9EWk=";
   };
 
   outputs = [
@@ -124,10 +124,10 @@ stdenv.mkDerivation (finalAttrs: {
     lib.mapAttrsToList lib.mesonEnable {
       v4l2 = true;
       tracing = withTracing;
-      cam = true;
       qcam = withQcam;
       pycamera = true;
       libunwind = false;
+      libdw = false;
       lc-compliance = true;
 
       # Documentation breaks binary compatibility.
@@ -137,6 +137,14 @@ stdenv.mkDerivation (finalAttrs: {
 
       # tensorflow-lite is broken
       rpi-awb-nn = false;
+
+      softisp-gpu = false; # requires egl
+      apps-output-dng = false; # requires libtiff
+
+      cam = true;
+      cam-output-kms = true;
+      cam-output-sdl2 = false;
+      cam-jpeg = true;
     }
     ++ [
       (lib.mesonBool "test" finalAttrs.finalPackage.doCheck)
