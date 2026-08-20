@@ -50,7 +50,7 @@
   libxext,
   libxdamage,
   ncurses,
-  enableFireWire ? stdenv.hostPlatform.isLinux,
+  enableFireWire ? false,
   libavc1394,
   libiec61883,
   enableOSS ? false,
