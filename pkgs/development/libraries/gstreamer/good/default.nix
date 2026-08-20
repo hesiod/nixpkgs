@@ -53,7 +53,7 @@
   enableFireWire ? stdenv.hostPlatform.isLinux,
   libavc1394,
   libiec61883,
-  enableOSS ? stdenv.hostPlatform.isLinux,
+  enableOSS ? false,
   enableWayland ? stdenv.hostPlatform.isLinux,
   wayland,
   wayland-protocols,
