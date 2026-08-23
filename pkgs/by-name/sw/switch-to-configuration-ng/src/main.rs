@@ -935,22 +935,28 @@ fn cannot_be_restarted_directly(unit: &str) -> bool {
         || unit.ends_with(".slice")
 }
 
-// Returns a HashMap containing the same contents as the passed in `units`, minus the units in
-// `units_to_filter`.
-fn filter_units(units_to_filter: &UnitSet, units: &UnitSet) -> UnitSet {
-    units
-        .difference(units_to_filter)
-        .map(ToOwned::to_owned)
-        .collect()
-}
-
 /// Print a set of units with a verb describing the action we're taking and
 /// an optional context describing the units.
 fn print_units_with_context(verb: &str, context: Option<&str>, units: &UnitSet) {
+    // Don't spam the user with target units that always get started.
+    let filter_target_units = std::env::var("STC_DISPLAY_ALL_UNITS").as_deref() != Ok("1");
+
     if units.is_empty() {
         return;
     }
-    let mut names: Vec<&str> = units.iter().map(String::as_str).collect();
+
+    let mut names: Vec<&str> = units
+        .iter()
+        .filter(|name| {
+            if filter_target_units {
+                !name.ends_with(".target")
+            } else {
+                true
+            }
+        })
+        .map(String::as_str)
+        .collect();
+
     names.sort_by_key(|n| n.to_lowercase());
     let names = names.join(", ");
     if let Some(context_str) = context {
@@ -1148,7 +1154,6 @@ fn collect_unit_changes(
     units_to_reload: &mut UnitSet,
     units_to_restart: &mut UnitSet,
     units_to_skip: &mut UnitSet,
-    units_to_filter: &mut UnitSet,
 ) -> Result<()> {
     let fragment_prefix = scope
         .current_dir()
@@ -1262,10 +1267,6 @@ fn collect_unit_changes(
                 )) {
                     units_to_start.insert(unit.to_string());
                     record_unit(&start_list, unit);
-                    // Don't spam the user with target units that always get started.
-                    if std::env::var("STC_DISPLAY_ALL_UNITS").as_deref() != Ok("1") {
-                        units_to_filter.insert(unit.to_string());
-                    }
                 }
 
                 // Stop targets that have X-StopOnReconfiguration set. This is necessary to respect
@@ -1388,7 +1389,6 @@ fn do_user_switch(parent_exe: String) -> anyhow::Result<()> {
     // activation and passed it to us so we can still compare old vs new.
     let mut units_to_stop = HashSet::new();
     let mut units_to_skip = HashSet::new();
-    let mut units_to_filter = HashSet::new();
 
     // Seed from any previous interrupted run so that we continue where we left
     // off, like the system scope does.
@@ -1486,7 +1486,6 @@ fn do_user_switch(parent_exe: String) -> anyhow::Result<()> {
         &mut units_to_reload,
         &mut units_to_restart,
         &mut units_to_skip,
-        &mut units_to_filter,
     )?;
 
     // Restarted unconditionally below; don't list it as skipped.
@@ -1501,10 +1500,7 @@ fn do_user_switch(parent_exe: String) -> anyhow::Result<()> {
         print_units("would NOT restart", &units_to_skip);
         print_units("would reload", &units_to_reload);
         print_units("would restart", &units_to_restart);
-        print_units(
-            "would start",
-            &filter_units(&units_to_filter, &units_to_start),
-        );
+        print_units("would start", &units_to_start);
         return Ok(());
     }
 
@@ -1563,8 +1559,7 @@ fn do_user_switch(parent_exe: String) -> anyhow::Result<()> {
     remove_file_if_exists(&restart_list)
         .with_context(|| format!("Failed to remove {}", restart_list.display()))?;
 
-    let start_filtered = filter_units(&units_to_filter, &units_to_start);
-    print_units("starting", &start_filtered);
+    print_units("starting", &units_to_start);
     for unit in &units_to_start {
         match systemd.start_unit(unit, "replace") {
             Ok(job_path) => {
@@ -1651,7 +1646,7 @@ fn do_user_switch(parent_exe: String) -> anyhow::Result<()> {
 
         // Re-start active targets so any other newly-unmasked dependencies are
         // pulled in as well.
-        for unit in units_to_start {
+        for unit in &units_to_start {
             if unit.ends_with(".target") {
                 to_start.insert(unit.clone());
             }
@@ -1689,8 +1684,7 @@ fn do_user_switch(parent_exe: String) -> anyhow::Result<()> {
         }
         block_on_jobs(&dbus_conn, &submitted_jobs)?;
 
-        let to_start_filtered = filter_units(&units_to_filter, &to_start);
-        print_units("starting (post-activation)", &to_start_filtered);
+        print_units("starting (post-activation)", &to_start);
         for unit in &to_start {
             match systemd.start_unit(unit, "replace") {
                 Ok(job_path) => {
@@ -1873,7 +1867,6 @@ won't take effect until you reboot the system.
 
     let mut units_to_stop = HashSet::new();
     let mut units_to_skip = HashSet::new();
-    let mut units_to_filter = HashSet::new(); // units not shown
 
     let mut units_to_start = map_from_list_file(START_LIST_FILE);
     let mut units_to_restart = map_from_list_file(RESTART_LIST_FILE);
@@ -1935,7 +1928,6 @@ won't take effect until you reboot the system.
         &mut units_to_reload,
         &mut units_to_restart,
         &mut units_to_skip,
-        &mut units_to_filter,
     )?;
 
     // Compare the previous and new fstab to figure out which filesystems need a remount or need to
@@ -2027,13 +2019,13 @@ won't take effect until you reboot the system.
     let restart_systemd = current_pid1_path != new_pid1_path
         || current_systemd_system_config != new_systemd_system_config;
 
-    let units_to_stop_filtered = filter_units(&units_to_filter, &units_to_stop);
-
-    let print_units = |verb, units| { print_units_with_context(verb, None, units); };
+    fn print_units(verb: &str, units: &HashSet<String>) {
+        print_units_with_context(verb, None, units);
+    }
 
     // Show dry-run actions.
     if *action == Action::DryActivate {
-        print_units("would stop", &units_to_stop_filtered);
+        print_units("would stop", &units_to_stop);
         print_units_with_context("would NOT stop", Some("changed"), &units_to_skip);
 
         eprintln!("would activate the configuration...");
@@ -2130,9 +2122,7 @@ won't take effect until you reboot the system.
 
         print_units("would reload", &units_to_reload);
         print_units("would restart", &units_to_restart);
-
-        let units_to_start_filtered = filter_units(&units_to_filter, &units_to_start);
-        print_units("would start", &units_to_start_filtered);
+        print_units("would start", &units_to_start);
 
         std::process::exit(0);
     }
@@ -2140,7 +2130,7 @@ won't take effect until you reboot the system.
     log::info!("switching to system configuration {}", toplevel.display());
 
     if !units_to_stop.is_empty() {
-        print_units("stopping", &units_to_stop_filtered);
+        print_units("stopping", &units_to_stop);
 
         for unit in &units_to_stop {
             if let Ok(job_path) = systemd.stop_unit(unit, "replace") {
@@ -2475,8 +2465,7 @@ won't take effect until you reboot the system.
     // because some may not be dependencies of the targets (i.e., they were manually started).
     // FIXME: detect units that are symlinks to other units.  We shouldn't start both at the same
     // time because we'll get a "Failed to add path to set" error from systemd.
-    let units_to_start_filtered = filter_units(&units_to_filter, &units_to_start);
-    print_units("starting", &units_to_start_filtered);
+    print_units("starting", &units_to_start);
     for unit in &units_to_start {
         match systemd.start_unit(unit, "replace") {
             Ok(job_path) => {
@@ -2687,22 +2676,6 @@ invalid
             assert_eq!(home_fs.device, "/dev/disk/by-partlabel/home");
             assert_eq!(home_fs.options, "defaults");
         }
-    }
-
-    #[test]
-    fn filter_units() {
-        assert_eq!(
-            super::filter_units(&HashMap::from([]), &HashMap::from([])),
-            HashMap::from([])
-        );
-
-        assert_eq!(
-            super::filter_units(
-                &HashMap::from([("foo".to_string(), ())]),
-                &HashMap::from([("foo".to_string(), ()), ("bar".to_string(), ())])
-            ),
-            HashMap::from([("bar".to_string(), ())])
-        );
     }
 
     #[test]
