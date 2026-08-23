@@ -944,6 +944,22 @@ fn filter_units(units_to_filter: &UnitSet, units: &UnitSet) -> UnitSet {
         .collect()
 }
 
+/// Print a set of units with a verb describing the action we're taking and
+/// an optional context describing the units.
+fn print_units_with_context(verb: &str, context: Option<&str>, units: &UnitSet) {
+    if units.is_empty() {
+        return;
+    }
+    let mut names: Vec<&str> = units.iter().map(String::as_str).collect();
+    names.sort_by_key(|n| n.to_lowercase());
+    let names = names.join(", ");
+    if let Some(context_str) = context {
+        eprintln!("{verb} the following {context_str} units: {names}");
+    } else {
+        eprintln!("{verb} the following units: {names}");
+    }
+}
+
 /// Action to take on a unit that migrated to NixOS ownership during the
 /// post-activation pass. Honours the same X-* directives as
 /// `handle_modified_unit`.
@@ -1476,20 +1492,13 @@ fn do_user_switch(parent_exe: String) -> anyhow::Result<()> {
     // Restarted unconditionally below; don't list it as skipped.
     units_to_skip.remove("nixos-activation.service");
 
-    let print_units = |verb: &str, units: &UnitSet| {
-        if units.is_empty() {
-            return;
-        }
-        let mut names: Vec<&str> = units.iter().map(String::as_str).collect();
-        names.sort_by_key(|n| n.to_lowercase());
-        eprintln!("{verb} the following user units: {}", names.join(", "));
+    let print_units = |verb, units| {
+        print_units_with_context(verb, Some("user"), units);
     };
 
     if dry_run {
         print_units("would stop", &units_to_stop);
-        if !units_to_skip.is_empty() {
-            print_units("would NOT restart", &units_to_skip);
-        }
+        print_units("would NOT restart", &units_to_skip);
         print_units("would reload", &units_to_reload);
         print_units("would restart", &units_to_restart);
         print_units(
@@ -2020,28 +2029,12 @@ won't take effect until you reboot the system.
 
     let units_to_stop_filtered = filter_units(&units_to_filter, &units_to_stop);
 
+    let print_units = |verb, units| { print_units_with_context(verb, None, units); };
+
     // Show dry-run actions.
     if *action == Action::DryActivate {
-        if !units_to_stop_filtered.is_empty() {
-            let mut units = units_to_stop_filtered
-                .iter()
-                .map(String::as_str)
-                .collect::<Vec<&str>>();
-            units.sort_by_key(|name| name.to_lowercase());
-            eprintln!("would stop the following units: {}", units.join(", "));
-        }
-
-        if !units_to_skip.is_empty() {
-            let mut units = units_to_skip
-                .iter()
-                .map(String::as_str)
-                .collect::<Vec<&str>>();
-            units.sort_by_key(|name| name.to_lowercase());
-            eprintln!(
-                "would NOT stop the following changed units: {}",
-                units.join(", ")
-            );
-        }
+        print_units("would stop", &units_to_stop_filtered);
+        print_units_with_context("would NOT stop", Some("changed"), &units_to_skip);
 
         eprintln!("would activate the configuration...");
         _ = std::process::Command::new(out.join("dry-activate"))
@@ -2135,33 +2128,11 @@ won't take effect until you reboot the system.
             eprintln!("would restart systemd");
         }
 
-        if !units_to_reload.is_empty() {
-            let mut units = units_to_reload
-                .iter()
-                .map(String::as_str)
-                .collect::<Vec<&str>>();
-            units.sort_by_key(|name| name.to_lowercase());
-            eprintln!("would reload the following units: {}", units.join(", "));
-        }
-
-        if !units_to_restart.is_empty() {
-            let mut units = units_to_restart
-                .iter()
-                .map(String::as_str)
-                .collect::<Vec<&str>>();
-            units.sort_by_key(|name| name.to_lowercase());
-            eprintln!("would restart the following units: {}", units.join(", "));
-        }
+        print_units("would reload", &units_to_reload);
+        print_units("would restart", &units_to_restart);
 
         let units_to_start_filtered = filter_units(&units_to_filter, &units_to_start);
-        if !units_to_start_filtered.is_empty() {
-            let mut units = units_to_start_filtered
-                .iter()
-                .map(String::as_str)
-                .collect::<Vec<&str>>();
-            units.sort_by_key(|name| name.to_lowercase());
-            eprintln!("would start the following units: {}", units.join(", "));
-        }
+        print_units("would start", &units_to_start_filtered);
 
         std::process::exit(0);
     }
@@ -2169,14 +2140,7 @@ won't take effect until you reboot the system.
     log::info!("switching to system configuration {}", toplevel.display());
 
     if !units_to_stop.is_empty() {
-        if !units_to_stop_filtered.is_empty() {
-            let mut units = units_to_stop_filtered
-                .iter()
-                .map(String::as_str)
-                .collect::<Vec<&str>>();
-            units.sort_by_key(|name| name.to_lowercase());
-            eprintln!("stopping the following units: {}", units.join(", "));
-        }
+        print_units("stopping", &units_to_stop_filtered);
 
         for unit in &units_to_stop {
             if let Ok(job_path) = systemd.stop_unit(unit, "replace") {
@@ -2188,17 +2152,7 @@ won't take effect until you reboot the system.
         block_on_jobs(&dbus_conn, &submitted_jobs)?;
     }
 
-    if !units_to_skip.is_empty() {
-        let mut units = units_to_skip
-            .iter()
-            .map(String::as_str)
-            .collect::<Vec<&str>>();
-        units.sort_by_key(|name| name.to_lowercase());
-        eprintln!(
-            "NOT restarting the following changed units: {}",
-            units.join(", "),
-        );
-    }
+    print_units_with_context("NOT restarting", Some("changed"), &units_to_skip);
 
     // Wait for all stop jobs to finish
     block_on_jobs(&dbus_conn, &submitted_jobs)?;
@@ -2472,12 +2426,7 @@ won't take effect until you reboot the system.
 
     // Reload units that need it. This includes remounting changed mount units.
     if !units_to_reload.is_empty() {
-        let mut units = units_to_reload
-            .iter()
-            .map(String::as_str)
-            .collect::<Vec<&str>>();
-        units.sort_by_key(|name| name.to_lowercase());
-        eprintln!("reloading the following units: {}", units.join(", "));
+        print_units("reloading", &units_to_reload);
 
         for unit in &units_to_reload {
             match systemd.reload_unit(unit, "replace") {
@@ -2501,14 +2450,9 @@ won't take effect until you reboot the system.
 
     // Restart changed services (those that have to be restarted rather than stopped and started).
     if !units_to_restart.is_empty() {
-        let mut units = units_to_restart
-            .iter()
-            .map(String::as_str)
-            .collect::<Vec<&str>>();
-        units.sort_by_key(|name| name.to_lowercase());
-        eprintln!("restarting the following units: {}", units.join(", "));
+        print_units("restarting", &units_to_restart);
 
-        for unit in units {
+        for unit in &units_to_restart {
             match systemd.restart_unit(unit, "replace") {
                 Ok(job_path) => {
                     let mut jobs = submitted_jobs.borrow_mut();
@@ -2532,15 +2476,7 @@ won't take effect until you reboot the system.
     // FIXME: detect units that are symlinks to other units.  We shouldn't start both at the same
     // time because we'll get a "Failed to add path to set" error from systemd.
     let units_to_start_filtered = filter_units(&units_to_filter, &units_to_start);
-    if !units_to_start_filtered.is_empty() {
-        let mut units = units_to_start_filtered
-            .iter()
-            .map(String::as_str)
-            .collect::<Vec<&str>>();
-        units.sort_by_key(|name| name.to_lowercase());
-        eprintln!("starting the following units: {}", units.join(", "));
-    }
-
+    print_units("starting", &units_to_start_filtered);
     for unit in &units_to_start {
         match systemd.start_unit(unit, "replace") {
             Ok(job_path) => {
