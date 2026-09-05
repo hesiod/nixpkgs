@@ -16,6 +16,8 @@
   curl,
   python3,
   python3Packages,
+  getopt,
+  gh,
 }:
 
 stdenvNoCC.mkDerivation {
@@ -49,6 +51,8 @@ stdenvNoCC.mkDerivation {
   ];
 
   bashScripts = [
+    "latest-github-release"
+
     "list-archive-two-levels-versions"
     "list-git-tags"
     "mark-broken"
@@ -68,6 +72,8 @@ stdenvNoCC.mkDerivation {
         jq
         nix
         curl
+        getopt
+        gh
       ];
     in
     ''
