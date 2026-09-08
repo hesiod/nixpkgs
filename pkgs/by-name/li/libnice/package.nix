@@ -3,7 +3,6 @@
   stdenv,
   testers,
   fetchFromGitLab,
-  fetchpatch,
   nix-update-script,
   meson,
   ninja,
@@ -27,7 +26,7 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "libnice";
-  version = "0.1.23";
+  version = "0.1.24";
 
   outputs = [
     "bin"
@@ -41,7 +40,7 @@ stdenv.mkDerivation (finalAttrs: {
     owner = "libnice";
     repo = "libnice";
     tag = finalAttrs.version;
-    hash = "sha256-UPppE5kBois0jJwsHKefBC8iTfSIkPZXV6XnUBnEFn8=";
+    hash = "sha256-7y+yTf/kp4uy9LZCbcMisA1892csBjdXQU5mOVnrxRY=";
   };
 
   patches = [
@@ -51,12 +50,6 @@ stdenv.mkDerivation (finalAttrs: {
   ]
   # TODO: investigate what's wrong
   ++ lib.optionals (!stdenv.hostPlatform.isDarwin) [
-    (fetchpatch {
-      name = "freebsd.patch";
-      url = "https://gitlab.freedesktop.org/libnice/libnice/-/commit/479f0813a571ff035bf00de679db452a0441125b.patch";
-      hash = "sha256-rr8pAb8TjU85jYWUjsMMKkLxxXVE3B+IjfAyOw9suo0=";
-    })
-
     # https://gitlab.freedesktop.org/libnice/libnice/-/merge_requests/353
     ./musl.patch
   ];
