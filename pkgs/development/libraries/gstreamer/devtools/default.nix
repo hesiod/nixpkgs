@@ -1,6 +1,7 @@
 {
   lib,
   stdenv,
+  testers,
   fetchurl,
   cairo,
   meson,
@@ -95,6 +96,8 @@ stdenv.mkDerivation (finalAttrs: {
   cargoRoot = "dots-viewer";
 
   passthru = {
+    tests.pkg-config = testers.testMetaPkgConfig finalAttrs.finalPackage;
+
     updateScript =
       let
         updateSource = directoryListingUpdater { odd-unstable = true; };
@@ -132,5 +135,6 @@ stdenv.mkDerivation (finalAttrs: {
     license = lib.licenses.lgpl2Plus;
     platforms = lib.platforms.unix;
     maintainers = with lib.maintainers; [ tmarkus ];
+    pkgConfigModules = [ "gstreamer-validate-1.0" ];
   };
 })
