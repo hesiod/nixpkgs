@@ -1,6 +1,7 @@
 {
   lib,
   stdenv,
+  testers,
   fetchurl,
   meson,
   ninja,
@@ -83,6 +84,8 @@ stdenv.mkDerivation (finalAttrs: {
   '';
 
   passthru = {
+    tests.pkg-config = testers.testMetaPkgConfig finalAttrs.finalPackage;
+
     updateScript = directoryListingUpdater { odd-unstable = true; };
   };
 
@@ -91,6 +94,7 @@ stdenv.mkDerivation (finalAttrs: {
     mainProgram = "ges-launch-1.0";
     homepage = "https://gstreamer.freedesktop.org";
     license = lib.licenses.lgpl2Plus;
+    pkgConfigModules = [ "gst-editing-services-1.0" ];
     platforms = lib.platforms.unix;
     maintainers = with lib.maintainers; [ tmarkus ];
   };
