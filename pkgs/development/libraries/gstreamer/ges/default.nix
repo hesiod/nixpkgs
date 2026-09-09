@@ -69,10 +69,12 @@ stdenv.mkDerivation (finalAttrs: {
     gst-plugins-bad
   ];
 
-  mesonFlags = [
-    (lib.mesonEnable "doc" enableDocumentation)
-    (lib.mesonEnable "tests" finalAttrs.finalPackage.doCheck)
-  ];
+  mesonFlags = lib.mapAttrsToList lib.mesonEnable {
+    doc = enableDocumentation;
+    tests = finalAttrs.finalPackage.doCheck;
+    examples = false;
+    tools = true;
+  };
 
   postPatch = ''
     patchShebangs \
