@@ -642,6 +642,10 @@ buildPythonPackage.override { inherit stdenv; } (finalAttrs: {
   ++ lib.optionals rocmSupport [
     rocmtoolkit_joined
     rocmPackages.clr # Added separately so setup hook applies
+  ]
+  ++ lib.optionals vulkanSupport [
+    vulkan-headers
+    vulkan-loader
   ];
 
   dependencies = [
@@ -662,11 +666,7 @@ buildPythonPackage.override { inherit stdenv; } (finalAttrs: {
     six
     tensorboard
   ]
-  ++ lib.optionals tritonSupport [ _tritonEffective ]
-  ++ lib.optionals vulkanSupport [
-    vulkan-headers
-    vulkan-loader
-  ];
+  ++ lib.optionals tritonSupport [ _tritonEffective ];
 
   propagatedCxxBuildInputs =
     [ ] ++ lib.optionals MPISupport [ mpi ] ++ lib.optionals rocmSupport [ rocmtoolkit_joined ];
