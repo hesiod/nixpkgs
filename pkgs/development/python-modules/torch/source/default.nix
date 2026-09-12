@@ -416,27 +416,9 @@ buildPythonPackage.override { inherit stdenv; } (finalAttrs: {
         '#include "${lib.getInclude llvmPackages.openmp}/include/omp.h"'
   '';
 
-  # NOTE(@connorbaker): Though we do not disable Gloo or MPI when building with CUDA support, caution should be taken
-  # when using the different backends. Gloo's GPU support isn't great, and MPI and CUDA can't be used at the same time
-  # without extreme care to ensure they don't lock each other out of shared resources.
-  # For more, see https://github.com/open-mpi/ompi/issues/7733#issuecomment-629806195.
-  preConfigure =
-    lib.optionalString cudaSupport ''
-      export TORCH_CUDA_ARCH_LIST="${gpuTargetString}"
-      export CUDAToolkit_CUPTI_INCLUDE_DIR=${lib.getInclude cudaPackages.cuda_cupti}/include
-      export CUDA_cupti_LIBRARY=${lib.getLib cudaPackages.cuda_cupti}/lib/libcupti.so
-    ''
-    + lib.optionalString (cudaSupport && cudaPackages ? cudnn) ''
-      export CUDNN_INCLUDE_DIR=${lib.getLib cudnn}/include
-      export CUDNN_LIB_DIR=${lib.getLib cudnn}/lib
-    ''
-    + lib.optionalString rocmSupport ''
-      export ROCM_PATH=${rocmtoolkit_joined}
-      export ROCM_SOURCE_DIR=${rocmtoolkit_joined}
-      export PYTORCH_ROCM_ARCH="${gpuTargetString}"
-      export CMAKE_CXX_FLAGS="-I${rocmtoolkit_joined}/include"
-      python tools/amd_build/build_amd.py
-    '';
+  preConfigure = lib.optionalString rocmSupport ''
+    python tools/amd_build/build_amd.py
+  '';
 
   # Use pytorch's custom configurations
   dontUseCmakeConfigure = true;
@@ -507,6 +489,19 @@ buildPythonPackage.override { inherit stdenv; } (finalAttrs: {
   // lib.optionalAttrs vulkanSupport {
     VULKAN_SDK = shaderc.bin;
   }
+  # NOTE(@connorbaker): Though we do not disable Gloo or MPI when building with CUDA support, caution should be taken
+  # when using the different backends. Gloo's GPU support isn't great, and MPI and CUDA can't be used at the same time
+  # without extreme care to ensure they don't lock each other out of shared resources.
+  # For more, see https://github.com/open-mpi/ompi/issues/7733#issuecomment-629806195.
+  // lib.optionalAttrs cudaSupport {
+    TORCH_CUDA_ARCH_LIST = gpuTargetString;
+    CUDAToolkit_CUPTI_INCLUDE_DIR = "${lib.getInclude cudaPackages.cuda_cupti}/include";
+    CUDA_cupti_LIBRARY = "${lib.getLib cudaPackages.cuda_cupti}/lib/libcupti.so";
+  }
+  // lib.optionalAttrs (cudaSupport && cudaPackages ? cudnn) {
+    CUDNN_INCLUDE_DIR = "${lib.getLib cudnn}/include";
+    CUDNN_LIB_DIR = "${lib.getLib cudnn}/lib";
+  }
   // lib.optionalAttrs rocmSupport {
     AOTRITON_INSTALLED_PREFIX = "${rocmPackages.aotriton}";
     # Don't copy AOTriton to output, load from AOTriton package
@@ -514,6 +509,11 @@ buildPythonPackage.override { inherit stdenv; } (finalAttrs: {
     # Broken HIP flag setup, fails to compile due to not finding rocthrust
     # Only supports gfx942 so let's turn it off for now
     USE_FBGEMM_GENAI = setBool false;
+
+    ROCM_PATH = rocmtoolkit_joined;
+    ROCM_SOURCE_DIR = rocmtoolkit_joined;
+    PYTORCH_ROCM_ARCH = gpuTargetString;
+    CMAKE_CXX_FLAGS = "-I${rocmtoolkit_joined}/include";
   };
 
   cmakeFlags = [
