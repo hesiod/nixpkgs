@@ -443,8 +443,6 @@ buildPythonPackage.override { inherit stdenv; } (finalAttrs: {
   hardeningDisable = [ "fortify3" ];
 
   env = {
-    BUILD_NAMEDTENSOR = setBool true;
-
     # We only do an imports check, so do not build tests either.
     BUILD_TEST = setBool false;
 
