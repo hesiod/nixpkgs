@@ -481,6 +481,7 @@ buildPythonPackage.override { inherit stdenv; } (finalAttrs: {
     USE_CCACHE = setBool false;
 
     BUILD_CUSTOM_PROTOBUF = setBool false;
+    USE_SYSTEM_ONNX = setBool true;
 
     # Set the correct Python library path, broken since
     # https://github.com/pytorch/pytorch/commit/3d617333e
@@ -594,6 +595,7 @@ buildPythonPackage.override { inherit stdenv; } (finalAttrs: {
 
     # explicitly use pkgsHostTarget because we don't want to use python3Packages.protobuf
     pkgsHostTarget.protobuf
+    pkgsHostTarget.onnx
   ]
   # Including openmp leads to two copies being used on ARM, which segfaults.
   # https://github.com/pytorch/pytorch/issues/149201#issuecomment-2776842320
