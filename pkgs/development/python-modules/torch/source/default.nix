@@ -210,6 +210,7 @@ let
         rocblas
         rocsparse
         hipsparse
+        hipsparselt
         rocthrust
         rocprim
         hipcub
@@ -227,6 +228,7 @@ let
         rocm-device-libs
         rocm-runtime
         rocm-smi
+        rocshmem
         clr.icd
         hipify
         rocprofiler-sdk
