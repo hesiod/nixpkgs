@@ -372,8 +372,8 @@ buildPythonPackage.override { inherit stdenv; } (finalAttrs: {
     substituteInPlace third_party/NNPACK/CMakeLists.txt \
       --replace-fail "PYTHONPATH=" 'PYTHONPATH=$ENV{PYTHONPATH}:'
   ''
-  # flag from cmakeFlags doesn't work, not clear why
-  # setting it at the top of NNPACK's own CMakeLists does
+  # NNPACK does not respect PYTHON_SIX_SOURCE_DIR set from environment variable
+  # instead set it at the top of NNPACK's own CMakeLists.txt file
   + ''
     sed -i '2s;^;set(PYTHON_SIX_SOURCE_DIR ${six.src})\n;' third_party/NNPACK/CMakeLists.txt
   ''
@@ -517,7 +517,6 @@ buildPythonPackage.override { inherit stdenv; } (finalAttrs: {
   };
 
   cmakeFlags = [
-    (lib.cmakeFeature "PYTHON_SIX_SOURCE_DIR" "${six.src}")
     # (lib.cmakeBool "CMAKE_FIND_DEBUG_MODE" true)
   ]
   ++ lib.optionals cudaSupport [
