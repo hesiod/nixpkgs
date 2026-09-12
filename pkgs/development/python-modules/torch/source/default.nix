@@ -29,7 +29,6 @@
   withTensorboard ? false,
   MPISupport ? false,
   mpi,
-  buildDocs ? false,
   targetPackages,
 
   # tests.cudaAvailable:
@@ -445,7 +444,6 @@ buildPythonPackage.override { inherit stdenv; } (finalAttrs: {
 
   env = {
     BUILD_NAMEDTENSOR = setBool true;
-    BUILD_DOCS = setBool buildDocs;
 
     # We only do an imports check, so do not build tests either.
     BUILD_TEST = setBool false;
