@@ -468,6 +468,17 @@ buildPythonPackage.override { inherit stdenv; } (finalAttrs: {
 
     USE_NVSHMEM = setBool withNvshmem;
 
+    USE_VULKAN = setBool vulkanSupport;
+    USE_CUDA = setBool cudaSupport;
+    USE_ROCM = setBool rocmSupport;
+    USE_MAGMA = setBool (cudaSupport || rocmSupport);
+    USE_MPI = setBool MPISupport;
+    # Not supported by this package at the moment.
+    USE_OPENCL = setBool false;
+
+    # Can't use ccache in the sandbox
+    USE_CCACHE = setBool false;
+
     # Set the correct Python library path, broken since
     # https://github.com/pytorch/pytorch/commit/3d617333e
     PYTHON_LIB_REL_PATH = "${placeholder "out"}/${python.sitePackages}";
@@ -484,7 +495,6 @@ buildPythonPackage.override { inherit stdenv; } (finalAttrs: {
         "-Wno-error=incompatible-pointer-types"
       ]
     );
-    USE_VULKAN = setBool vulkanSupport;
   }
   // lib.optionalAttrs vulkanSupport {
     VULKAN_SDK = shaderc.bin;
