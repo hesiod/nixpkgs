@@ -54,6 +54,7 @@
   openssl,
   numactl,
   llvmPackages,
+  pkgsHostTarget,
 
   # dependencies
   filelock,
@@ -479,6 +480,8 @@ buildPythonPackage.override { inherit stdenv; } (finalAttrs: {
     # Can't use ccache in the sandbox
     USE_CCACHE = setBool false;
 
+    BUILD_CUSTOM_PROTOBUF = setBool false;
+
     # Set the correct Python library path, broken since
     # https://github.com/pytorch/pytorch/commit/3d617333e
     PYTHON_LIB_REL_PATH = "${placeholder "out"}/${python.sitePackages}";
@@ -588,6 +591,9 @@ buildPythonPackage.override { inherit stdenv; } (finalAttrs: {
   buildInputs = [
     blas
     blas.provider
+
+    # explicitly use pkgsHostTarget because we don't want to use python3Packages.protobuf
+    pkgsHostTarget.protobuf
   ]
   # Including openmp leads to two copies being used on ARM, which segfaults.
   # https://github.com/pytorch/pytorch/issues/149201#issuecomment-2776842320
