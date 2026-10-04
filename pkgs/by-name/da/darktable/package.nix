@@ -14,6 +14,7 @@
   pkg-config,
   wrapGAppsHook3,
   saxon,
+  perl5Packages,
 
   # buildInputs
   SDL2,
@@ -105,6 +106,7 @@ stdenv.mkDerivation (finalAttrs: {
     pkg-config
     wrapGAppsHook3
     saxon # Use Saxon instead of libxslt to fix XSLT generate-id() consistency issues
+    perl5Packages.Po4a
   ];
 
   buildInputs = [
