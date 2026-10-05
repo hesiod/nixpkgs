@@ -95,6 +95,9 @@ stdenv.mkDerivation (finalAttrs: {
     hash = "sha256-0tqSxnBAHTULV2Qx8h5YvuQDSOH1B4IBqKG4wnBYWDQ=";
   };
 
+  __structuredAttrs = true;
+  strictDeps = true;
+
   nativeBuildInputs = [
     cmake
     desktop-file-utils
