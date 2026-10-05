@@ -78,6 +78,9 @@
 
   # Darwin only
   gtk-mac-integration,
+
+  # for passthru.tests
+  darktable,
 }:
 
 let
@@ -286,6 +289,11 @@ stdenv.mkDerivation (finalAttrs: {
   nativeInstallCheckInputs = [
     versionCheckHook
   ];
+
+  passthru.tests = {
+    darktableWithAi = darktable.override { withAi = true; };
+    darktableMinimal = darktable.override { minimal = true; };
+  };
 
   passthru.updateScript = gitUpdater {
     rev-prefix = "release-";
