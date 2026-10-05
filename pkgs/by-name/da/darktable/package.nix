@@ -2,7 +2,11 @@
   lib,
   stdenv,
   fetchurl,
-  withAi ? false,
+  versionCheckHook,
+  gitUpdater,
+
+  # minimal build without any optional dependencies
+  minimal ? false,
 
   # nativeBuildInputs
   cmake,
@@ -19,70 +23,63 @@
   # buildInputs
   SDL2,
   adwaita-icon-theme,
-  alsa-lib,
   cairo,
+  cups,
   curl,
   exiv2,
   glib,
-  glib-networking,
   gmic,
   graphicsmagick,
   gtk3,
   icu,
   isocodes,
-  jasper,
   json-glib,
   lcms2,
   lensfun,
-  lerc,
-  libaom,
-  libarchive,
   libavif,
-  libdatrie,
-  libepoxy,
   libexif,
-  libgcrypt,
-  libgpg-error,
   libgphoto2,
   libheif,
   libjpeg,
   libjxl,
   libpng,
+  libraw,
   librsvg,
   libsecret,
-  libsysprof-capture,
-  libthai,
   libtiff,
   libwebp,
   libxml2,
   libxslt,
   lua5_4,
-  onnxruntime,
-  util-linux,
   openexr,
   openjpeg,
   osm-gps-map,
-  pcre2,
   portmidi,
   potrace,
   pugixml,
   sqlite,
-  # Linux only
+  zlib,
+
+  withColord ? lib.meta.availableOn stdenv.hostPlatform colord && !minimal,
   colord,
   colord-gtk,
-  libselinux,
-  libsepol,
-  libx11,
-  libxdmcp,
-  libxkbcommon,
-  libxtst,
+
+  withOpenCl ? stdenv.hostPlatform.isLinux && !minimal,
   ocl-icd,
+  opencl-headers,
+
+  # enable AI tools
+  withAi ? false,
+  libarchive,
+  onnxruntime,
+
+  # optional lint step
+  withXmllint ? !minimal,
+
   # Darwin only
   gtk-mac-integration,
-
-  versionCheckHook,
-  gitUpdater,
 }:
+
 let
   pugixml-shared = pugixml.override { shared = true; };
 in
@@ -103,82 +100,74 @@ stdenv.mkDerivation (finalAttrs: {
     desktop-file-utils
     intltool
     libxslt # xsltproc, used by tools/generate_styles_string.sh
-    llvmPackages.llvm
     ninja
     perl
     pkg-config
     wrapGAppsHook3
     saxon # Use Saxon instead of libxslt to fix XSLT generate-id() consistency issues
     perl5Packages.Po4a
+  ]
+  ++ lib.optionals withXmllint [
+    (lib.getBin libxml2)
   ];
 
   buildInputs = [
-    SDL2
     adwaita-icon-theme
     cairo
     curl
     exiv2
     glib
-    glib-networking
-    gmic
-    graphicsmagick
     gtk3
-    icu
-    isocodes
-    jasper
     json-glib
     lcms2
     lensfun
-    lerc
-    libaom
-    libavif
-    libdatrie
-    libepoxy
     libexif
-    libgcrypt
-    libgpg-error
+    libjpeg
+    libpng
+    libraw
+    librsvg
+    libtiff
+    libxml2
+    potrace
+    pugixml-shared
+    sqlite
+    zlib
+  ]
+  ++ lib.optionals (!minimal) [
+    SDL2
+    cups
+    gmic
+    graphicsmagick
+    icu
+    isocodes
+    libavif
     libgphoto2
     libheif
-    libjpeg
     libjxl
-    libpng
-    librsvg
     libsecret
-    libsysprof-capture
-    libthai
-    libtiff
     libwebp
-    libxml2
     lua5_4
     openexr
     openjpeg
     osm-gps-map
-    pcre2
     portmidi
-    potrace
-    pugixml-shared
-    sqlite
   ]
   ++ lib.optionals withAi [
     libarchive
     onnxruntime
   ]
-  ++ lib.optionals stdenv.hostPlatform.isLinux [
-    alsa-lib
+  ++ lib.optionals withColord [
     colord
     colord-gtk
-    libselinux
-    libsepol
-    libx11
-    libxdmcp
-    libxkbcommon
-    libxtst
+  ]
+  ++ lib.optionals withOpenCl [
+    opencl-headers
     ocl-icd
-    util-linux
   ]
   ++ lib.optional stdenv.hostPlatform.isDarwin gtk-mac-integration
   ++ lib.optional stdenv.cc.isClang llvmPackages.openmp;
 
+<<<<<<< HEAD
   cmakeFlags = [
     # Prevents -march=native.
     "-DBINARY_PACKAGE_BUILD=1"
@@ -193,6 +182,72 @@ stdenv.mkDerivation (finalAttrs: {
     "-DUSE_COLORD=OFF"
     "-DUSE_KWALLET=OFF"
   ];
+||||||| parent of a00dc414327d (darktable: unvendor and clean up dependencies)
+  cmakeFlags = [
+    "-DBUILD_USERMANUAL=False"
+  ]
+  ++ lib.optionals withAi [
+    (lib.cmakeBool "USE_AI" true)
+    (lib.cmakeBool "ONNXRUNTIME_OFFLINE" true)
+  ]
+  ++ lib.optionals stdenv.hostPlatform.isDarwin [
+    "-DUSE_COLORD=OFF"
+    "-DUSE_KWALLET=OFF"
+  ];
+=======
+  cmakeFlags = lib.mapAttrsToList lib.cmakeBool {
+    # note: options are documented in DefineOptions.cmake
+
+    # Bit of a misnomer, makes Darktable not try to use -march=native
+    # (the cc wrappers override -march=native anyways, but let's specify it here for clarity)
+    CUSTOM_CFLAGS = true;
+    BINARY_PACKAGE_BUILD = true;
+
+    DONT_USE_INTERNAL_LUA = true;
+    DONT_USE_INTERNAL_LIBRAW = true;
+
+    USE_XMLLINT = withXmllint;
+
+    USE_AI = withAi;
+    ONNXRUNTIME_OFFLINE = withAi;
+
+    USE_COLORD = withColord;
+    USE_KWALLET = !stdenv.hostPlatform.isDarwin;
+
+    USE_OPENCL = withOpenCl;
+    TESTBUILD_OPENCL_PROGRAMS = false;
+
+    USE_OPENMP = true;
+
+    USE_CAMERA_SUPPORT = true;
+    USE_LIBRAW = true;
+
+    USE_LUA = !minimal;
+    USE_MAP = !minimal;
+    USE_LIBSECRET = !minimal;
+    USE_GMIC = !minimal;
+    USE_GRAPHICSMAGICK = !minimal;
+    USE_PORTMIDI = !minimal;
+    USE_OPENJPEG = !minimal;
+    USE_JXL = !minimal;
+    USE_WEBP = !minimal;
+    USE_AVIF = !minimal;
+    USE_HEIF = !minimal;
+    USE_OPENEXR = !minimal;
+    USE_ICU = !minimal;
+    USE_SDL2 = !minimal;
+
+    BUILD_PRINT = !minimal;
+
+    BUILD_NOISE_TOOLS = !minimal;
+    BUILD_CURVE_TOOLS = !minimal;
+
+    BUILD_CMSTEST = true;
+
+    # built darktable-rs-identify does not work without further patching
+    BUILD_TOOLS = false;
+  };
+>>>>>>> a00dc414327d (darktable: unvendor and clean up dependencies)
 
   # darktable changed its rpath handling in commit
   # 83c70b876af6484506901e6b381304ae0d073d3c and as a result the
@@ -217,7 +272,16 @@ stdenv.mkDerivation (finalAttrs: {
     '';
 
   postPatch = ''
+    # remove unused vendored libraries to ensure they won't get accidentally picked up
+    rm -r src/external/{LibRaw,LibRaw-cmake,lua}
+
     patchShebangs ./tools/generate_styles_string.sh
+
+    rm -r src/external/OpenCL
+    # note: will work without this due to cc wrapper include path handling,
+    # but patch the directory anyways in order to prevent possible issues in the future
+    substituteInPlace src/CMakeLists.txt \
+      --replace-fail 'include_directories(SYSTEM ''${CMAKE_CURRENT_SOURCE_DIR}/external/OpenCL)' 'include_directories(SYSTEM ${opencl-headers}/include/OpenCL)'
   '';
 
   # darktable hangs in versionCheckHook on darwin for an unknown reason, use darktable-cli instead
