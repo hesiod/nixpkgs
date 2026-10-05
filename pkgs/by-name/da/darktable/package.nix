@@ -305,5 +305,9 @@ stdenv.mkDerivation (finalAttrs: {
       mrVanDalo
       freyacodes
     ];
+    identifiers.purlParts = {
+      type = "github";
+      spec = "darktable-org/darktable@release-${finalAttrs.version}";
+    };
   };
 })
