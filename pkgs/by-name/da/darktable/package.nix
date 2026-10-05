@@ -262,10 +262,6 @@ stdenv.mkDerivation (finalAttrs: {
         + lib.optionalString stdenv.hostPlatform.isLinux ":${ocl-icd}/lib";
     in
     ''
-      for f in $out/share/darktable/kernels/*.cl; do
-        sed -r "s|#include \"(.*)\"|#include \"$out/share/darktable/kernels/\1\"|g" -i "$f"
-      done
-
       gappsWrapperArgs+=(
         --prefix ${libPathEnvVar} ":" "${libPathPrefix}"
       )
