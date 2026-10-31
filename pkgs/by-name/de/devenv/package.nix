@@ -19,6 +19,7 @@
   glibcLocalesUtf8,
   boehmgc,
   libghostty-vt,
+  aws-lc,
   llvmPackages,
   nixd,
   bash,
@@ -91,6 +92,7 @@ buildRustPackage {
   ];
 
   buildInputs = [
+    aws-lc
     openssl
     sqlite
     dbus
