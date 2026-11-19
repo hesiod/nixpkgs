@@ -1,4 +1,4 @@
-{ fetchFromGitHub, sourceData }:
+{ lib, fetchFromGitHub, sourceData }:
 
 # Using fetchFromGitHub from their mirror because we cannot use git during bootstrap
 # If you want you could fetchurl from "https://cgit.FreeBSD.org/src" instead.
@@ -9,4 +9,5 @@ fetchFromGitHub {
   owner = "freebsd";
   repo = "freebsd-src";
   inherit (sourceData) rev hash;
+  meta.license = lib.licenses.bsd2;
 }
