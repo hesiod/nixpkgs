@@ -21,3 +21,8 @@ buildPackages.writeShellScriptBin "boot-install" (
     ${buildPackages.coreutils}/bin/install "''${fixed_args[@]}"
   ''
 )
+// {
+  meta = {
+    inherit (buildPackages.coreutils.meta) license;
+  };
+}
