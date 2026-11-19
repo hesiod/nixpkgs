@@ -1,4 +1,4 @@
-{ replaceVarsWith, runtimeShell }:
+{ lib, replaceVarsWith, runtimeShell }:
 
 replaceVarsWith {
   name = "xargs-j";
@@ -9,4 +9,6 @@ replaceVarsWith {
   replacements = {
     inherit runtimeShell;
   };
+} // {
+  meta.license = lib.licenses.mit;
 }
