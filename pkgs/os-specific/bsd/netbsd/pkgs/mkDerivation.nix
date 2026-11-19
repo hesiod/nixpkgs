@@ -97,7 +97,8 @@ lib.makeOverridable (
         ];
         platforms = lib.platforms.unix;
         license = lib.licenses.bsd2;
-      };
+      }
+      // attrs.meta or { };
     }
     // lib.optionalAttrs stdenv'.hasCC {
       # TODO should CC wrapper set this?
@@ -115,7 +116,7 @@ lib.makeOverridable (
       installPhase = "includesPhase";
       dontBuild = true;
     }
-    // attrs
+    // (removeAttrs attrs [ "meta" ])
     // {
       # Files that use NetBSD-specific macros need to have nbtool_config.h
       # included ahead of them on non-NetBSD platforms.
