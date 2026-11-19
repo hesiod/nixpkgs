@@ -27,6 +27,7 @@ lib.packagesFromDirectoryRecursive {
     url = "https://git.FreeBSD.org/ports.git";
     rev = "dde3b2b456c3a4bdd217d0bf3684231cc3724a0a";
     sha256 = "BpHqJfnGOeTE7tkFJBx0Wk8ryalmf4KNTit/Coh026E=";
+    meta.license = lib.licenses.bsd2;
   };
 
   compatIsNeeded = !stdenvNoCC.hostPlatform.isFreeBSD;
